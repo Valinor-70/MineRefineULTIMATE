@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="MineRefine.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Other merged dictionaries here -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- TabView Color Resources - Current Context: 2025-06-06 17:31:51 for Valinor-70 -->
+
+            <!-- TabView Button Background Resources -->
+            <SolidColorBrush x:Key="TabViewButtonBackground" Color="#2D2D30"/>
+            <SolidColorBrush x:Key="TabViewButtonBackgroundPointerOver" Color="#3E3E42"/>
+            <SolidColorBrush x:Key="TabViewButtonBackgroundPressed" Color="#007ACC"/>
+            <SolidColorBrush x:Key="TabViewButtonBackgroundDisabled" Color="#1E1E1E"/>
+
+            <!-- TabView Button Foreground Resources -->
+            <SolidColorBrush x:Key="TabViewButtonForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewButtonForegroundPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewButtonForegroundPressed" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewButtonForegroundDisabled" Color="#808080"/>
+
+            <!-- TabView Button Border Resources -->
+            <SolidColorBrush x:Key="TabViewButtonBorderBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewButtonBorderBrushPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewButtonBorderBrushPressed" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewButtonBorderBrushDisabled" Color="Transparent"/>
+
+            <!-- TabView Background Resources -->
+            <SolidColorBrush x:Key="TabViewBackground" Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="TabViewHeaderBackground" Color="#2D2D30"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="#007ACC"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#3E3E42"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPressed" Color="#004578"/>
+
+            <!-- TabView Foreground Resources -->
+            <SolidColorBrush x:Key="TabViewForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPressed" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundDisabled" Color="#808080"/>
+
+            <!-- TabView Border Resources -->
+            <SolidColorBrush x:Key="TabViewBorderBrush" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBorderBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBorderBrushSelected" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBorderBrushPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBorderBrushPressed" Color="#FFD700"/>
+
+            <!-- TabView Content Background -->
+            <SolidColorBrush x:Key="TabViewContentBackground" Color="#1E1E1E"/>
+
+            <!-- TabView Close Button Resources -->
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonBackgroundPointerOver" Color="#E81123"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonBackgroundPressed" Color="#C50E1F"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonForegroundPointerOver" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderCloseButtonForegroundPressed" Color="#FFFFFF"/>
+
+            <!-- Additional TabView Resources -->
+            <SolidColorBrush x:Key="TabViewItemSeparator" Color="#3E3E42"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonBackground" Color="#2D2D30"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonBackgroundPointerOver" Color="#3E3E42"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonBackgroundPressed" Color="#007ACC"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonForegroundPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewScrollButtonForegroundPressed" Color="#FFFFFF"/>
+
+            <!-- TabView Add Button Resources -->
+            <SolidColorBrush x:Key="TabViewAddButtonBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewAddButtonBackgroundPointerOver" Color="#3E3E42"/>
+            <SolidColorBrush x:Key="TabViewAddButtonBackgroundPressed" Color="#007ACC"/>
+            <SolidColorBrush x:Key="TabViewAddButtonForeground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TabViewAddButtonForegroundPointerOver" Color="#FFD700"/>
+            <SolidColorBrush x:Key="TabViewAddButtonForegroundPressed" Color="#FFFFFF"/>
+
+            <!-- Professional Mining Game Color Scheme for Valinor-70 -->
+            <SolidColorBrush x:Key="MiningGoldBrush" Color="#FFD700"/>
+            <SolidColorBrush x:Key="MiningDarkBrush" Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="MiningAccentBrush" Color="#007ACC"/>
+            <SolidColorBrush x:Key="MiningSuccessBrush" Color="#32CD32"/>
+            <SolidColorBrush x:Key="MiningDangerBrush" Color="#E81123"/>
+            <SolidColorBrush x:Key="MiningWarningBrush" Color="#FF8C00"/>
+
+            <!-- Custom TabView Style for Ultimate Mining Experience -->
+            <Style x:Key="UltimateTabViewStyle" TargetType="TabView">
+                <Setter Property="Background" Value="{StaticResource TabViewBackground}"/>
+                <Setter Property="Foreground" Value="{StaticResource TabViewForeground}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource TabViewBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                <Setter Property="Padding" Value="8,4,8,4"/>
+                <Setter Property="IsTabStop" Value="False"/>
+                <Setter Property="TabWidthMode" Value="Equal"/>
+                <Setter Property="CloseButtonOverlayMode" Value="OnPointerOver"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabView">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Tab Header Area -->
+                                <Border Grid.Row="0" 
+                                        Background="{StaticResource TabViewHeaderBackground}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ScrollViewer x:Name="TabViewScrollViewer"
+                                                  HorizontalScrollBarVisibility="Auto"
+                                                  VerticalScrollBarVisibility="Disabled"
+                                                  HorizontalScrollMode="Enabled"
+                                                  VerticalScrollMode="Disabled">
+                                        <StackPanel x:Name="TabViewPanel" 
+                                                    Orientation="Horizontal"
+                                                    Spacing="4"/>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <!-- Content Area -->
+                                <Border Grid.Row="1" 
+                                        Background="{StaticResource TabViewContentBackground}">
+                                    <ContentPresenter x:Name="TabViewContentPresenter"
+                                                      Content="{TemplateBinding SelectedItem}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Custom TabViewItem Style -->
+            <Style x:Key="UltimateTabViewItemStyle" TargetType="TabViewItem">
+                <Setter Property="Background" Value="{StaticResource TabViewItemHeaderBackground}"/>
+                <Setter Property="Foreground" Value="{StaticResource TabViewItemHeaderForeground}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource TabViewItemHeaderBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="12,8,12,8"/>
+                <Setter Property="MinHeight" Value="32"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+            <!-- Professional Button Styles for Mining Interface -->
+            <Style x:Key="ProfessionalButtonStyle" TargetType="Button">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#FF2D2D30" Offset="0"/>
+                            <GradientStop Color="#FF1E1E1E" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#FFD700"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="16,8,16,8"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+
+            <!-- Mining Progress Bar Style -->
+            <Style x:Key="MiningProgressBarStyle" TargetType="ProgressBar">
+                <Setter Property="Background" Value="#AA2D2D30"/>
+                <Setter Property="Foreground" Value="{StaticResource MiningGoldBrush}"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#FFD700"/>
+            </Style>
+
+            <!-- Professional Card Style -->
+            <Style x:Key="ProfessionalCardStyle" TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#DD1E1E1E" Offset="0"/>
+                            <GradientStop Color="#BB2D2D30" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#60FFD700" Offset="0"/>
+                            <GradientStop Color="#40FF8C00" Offset="0.5"/>
+                            <GradientStop Color="#60FFD700" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="20,16,20,16"/>
+                <Setter Property="Margin" Value="8,6,8,6"/>
+            </Style>
+
+            <!-- Valinor-70 Ultimate Text Styles -->
+            <Style x:Key="Valinor70TitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{StaticResource MiningGoldBrush}"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="0,8,0,8"/>
+            </Style>
+
+            <Style x:Key="Valinor70SubtitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="0,4,0,4"/>
+            </Style>
+
+            <Style x:Key="Valinor70InfoStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Foreground" Value="#CCCCCC"/>
+                <Setter Property="TextAlignment" Value="Left"/>
+                <Setter Property="Margin" Value="0,2,0,2"/>
+            </Style>
+
+            <!-- Ultimate Mining ComboBox Style -->
+            <Style x:Key="UltimateMiningComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Background" Value="#AA2D2D30"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#FFD700"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="12,8,12,8"/>
+                <Setter Property="MinHeight" Value="36"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+            <!-- Professional Mining Slider Style -->
+            <Style x:Key="ProfessionalMiningSliderStyle" TargetType="Slider">
+                <Setter Property="Background" Value="#AA2D2D30"/>
+                <Setter Property="Foreground" Value="#FFD700"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Margin" Value="8,4,8,4"/>
+            </Style>
+
+            <!-- Current Session Timestamp Style -->
+            <Style x:Key="TimestampStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Foreground" Value="#888888"/>
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="Margin" Value="0,0,8,8"/>
+            </Style>
+
+            <!-- Ultimate Notification Style -->
+            <Style x:Key="UltimateNotificationStyle" TargetType="Border">
+                <Setter Property="Background" Value="#DD1E1E1E"/>
+                <Setter Property="BorderBrush" Value="#FFD700"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="16,12,16,12"/>
+                <Setter Property="Margin" Value="12,8,12,8"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

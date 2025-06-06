@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+	<Identity
+	  Name="Valinor70.MineRefineUltimate"
+	  Publisher="CN=Valinor-70"
+	  Version="3.0.0.0" />
+
+	<mp:PhoneIdentity PhoneProductId="b8f4c8a2-1234-5678-9abc-def012345678" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+
+	<Properties>
+		<DisplayName>Mine and Refine Ultimate</DisplayName>
+		<PublisherDisplayName>Valinor-70</PublisherDisplayName>
+		<Logo>ms-appx:///Assets/StoreLogo.png</Logo>
+		<Description>Ultimate mining and refining simulation game with advanced features including dynamic markets, skill trees, achievements, and immersive storylines.</Description>
+	</Properties>
+
+	<Dependencies>
+		<TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+		<TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+	</Dependencies>
+
+	<Resources>
+		<Resource Language="x-generate"/>
+	</Resources>
+
+	<Applications>
+		<Application Id="App"
+		  Executable="$targetnametoken$.exe"
+		  EntryPoint="$targetentrypoint$">
+			<uap:VisualElements
+			  DisplayName="Mine and Refine Ultimate"
+			  Description="Ultimate mining and refining simulation game"
+			  BackgroundColor="#1E1E1E"
+			  Square150x150Logo="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pick/3D/pick_3d.png"
+			  Square44x44Logo="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pick/3D/pick_3d.png">
+				<uap:DefaultTile
+				  Wide310x150Logo="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pick/3D/pick_3d.png"
+				  Square71x71Logo="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pick/3D/pick_3d.png" />
+				<uap:SplashScreen
+				  Image="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pick/3D/pick_3d.png"
+				  BackgroundColor="#1E1E1E" />
+			</uap:VisualElements>
+		</Application>
+	</Applications>
+
+	<Capabilities>
+		<Capability Name="internetClient" />
+	</Capabilities>
+</Package>
