@@ -1,0 +1,86 @@
+<ContentDialog x:Class="MineRefine.Views.SellQuantityDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               Title="Sell Mineral"
+               PrimaryButtonText="💰 Confirm Sale"
+               CloseButtonText="❌ Cancel"
+               DefaultButton="Primary">
+
+    <Grid Width="400" Height="300">
+        <Grid.Background>
+            <SolidColorBrush Color="#FF1E1E1E"/>
+        </Grid.Background>
+
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Mineral Info -->
+            <Border Grid.Row="0" Background="#FF3C3C3C" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock x:Name="MineralNameText" Text="Copper Ore" 
+                              FontSize="16" FontWeight="Bold" Foreground="#FFE6E6E6" 
+                              HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="AvailableQuantityText" Text="Available: 0" 
+                              FontSize="12" Foreground="#FFCCCCCC" 
+                              HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Quantity Selection -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                <TextBlock Text="Quantity to Sell:" FontWeight="Bold" Foreground="#FFE6E6E6" Margin="0,0,0,5"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="QuantityTextBox" Grid.Column="0" Text="1" 
+                            FontSize="14" Padding="8" Background="#FF2D2D30" 
+                            Foreground="#FFE6E6E6" BorderBrush="#FF007ACC" BorderThickness="2"/>
+                    <Button Grid.Column="1" Content="Half" Padding="8,4" Margin="5,0,0,0"
+                           Background="#FF0E7B0E" Foreground="White"
+                           Click="HalfButton_Click"/>
+                    <Button Grid.Column="2" Content="All" Padding="8,4" Margin="5,0,0,0"
+                           Background="#FF8B0000" Foreground="White"
+                           Click="AllButton_Click"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Price Info -->
+            <Border Grid.Row="2" Background="#FF3C3C3C" Padding="15" CornerRadius="5" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Unit Price:" FontSize="12" Foreground="#FFCCCCCC"/>
+                        <TextBlock x:Name="UnitPriceText" Text="£10" FontSize="16" 
+                                  FontWeight="Bold" Foreground="#FF90EE90"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Total Value:" FontSize="12" Foreground="#FFCCCCCC"/>
+                        <TextBlock x:Name="TotalValueText" Text="£10" FontSize="18" 
+                                  FontWeight="Bold" Foreground="#FFFFd700"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Market Info -->
+            <Border Grid.Row="3" Background="#FF2D2D30" Padding="10" CornerRadius="5" Margin="0,0,0,15">
+                <TextBlock x:Name="MarketInfoText" Text="Market conditions will be updated after sale" 
+                          FontSize="11" Foreground="#FFCCCCCC" TextWrapping="Wrap"/>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentDialog>
