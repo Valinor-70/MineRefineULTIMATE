@@ -1,0 +1,39 @@
+Mine & Refine Ultimate Edition – Community Source License v1.0  
+Effective Date: 2025-06-07  
+Maintainer: Rēsh-1
+
+This software is provided as-is under a limited-use license for personal, educational, and non-commercial purposes.
+
+1. PERMITTED USES  
+You are permitted to:
+- View and study the source code  
+- Modify the code for personal use  
+- Share modified or original versions freely, provided:
+  - No monetary compensation is involved  
+  - Attribution is clearly given to the original developers  
+  - This license is included in full with any redistributed version
+
+2. PROHIBITED USES  
+You may NOT:
+- Use the software or code for commercial purposes  
+- Sell, license, or offer this software as part of any paid product or service  
+- Use the name "Mine & Refine Ultimate Edition" without express permission  
+- Misrepresent modified versions as official
+
+3. TRADEMARK NOTICE  
+“Mine & Refine Ultimate Edition” is a protected trademark and may not be used in derivative works or promotional materials without written authorization.
+
+4. NO WARRANTY  
+This software is provided “as-is” without warranty of any kind. The maintainers are not liable for any damages or issues arising from its use.
+
+5. MODIFICATIONS  
+You are encouraged to fork and improve the project for non-commercial purposes. Contributions to the upstream project are welcome under the guidelines in `CONTRIBUTING.md`.
+
+6. TERMINATION  
+Permission is automatically terminated if any terms of this license are violated.
+
+7. CONTACT  
+For permissions, collaborations, or clarification, contact the maintainers through the official GitHub repository.
+
+Copyright © 2025 Rēsh-1 and contributors  
+All rights reserved.
