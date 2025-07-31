@@ -40,7 +40,7 @@ namespace MineRefine
         private List<FrameworkElement> _particles = new();
 
         // Constants - Updated to current timestamp
-        private const string CURRENT_DATETIME = "2025-06-07 08:47:19";
+        private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
 
         public MainWindow(Player player, GameSettings gameSettings)
         {
@@ -1051,7 +1051,7 @@ namespace MineRefine
                     _currentPlayer.CurrentLocationId = locationId;
                     _currentLocation = location;
                     location.TimesVisited++;
-                    location.LastVisited = DateTime.Parse("2025-06-07 08:51:01");
+                    location.LastVisited = DateTime.Parse("2025-07-31 13:29:22");
 
                     AddLogEntry($"🚀 Fast traveled to: {location.Name}");
                     UpdateLocationDescription();
@@ -1273,7 +1273,7 @@ namespace MineRefine
                 AddLogEntry($"🎯 Current Rank: {_currentPlayer.Rank.ToString().Replace("_", " ")}");
                 AddLogEntry($"📍 Location: {_currentLocation?.Name ?? "Unknown"}");
                 AddLogEntry($"🌤️ Weather: {_currentLocation?.CurrentWeather}");
-                AddLogEntry($"⚡ Systems initialized at 2025-06-07 08:51:01 UTC");
+                AddLogEntry($"⚡ Systems initialized at 2025-07-31 13:29:22 UTC");
             }
             catch (Exception ex)
             {
@@ -1313,7 +1313,7 @@ namespace MineRefine
                 {
                     _currentPlayer.CurrentLocationId = locationId;
                     _currentLocation.TimesVisited++;
-                    _currentLocation.LastVisited = DateTime.Parse("2025-06-07 08:51:01");
+                    _currentLocation.LastVisited = DateTime.Parse("2025-07-31 13:29:22");
 
                     UpdateLocationDescription();
                     AddLogEntry($"📍 Moved to: {_currentLocation.Name}");
@@ -1406,7 +1406,7 @@ namespace MineRefine
                 if (GameLogPanel == null) return;
 
                 GameLogPanel.Children.Clear();
-                AddLogEntry($"🧹 Mining log cleared at {DateTime.Parse("2025-06-07 08:51:01"):HH:mm:ss}");
+                AddLogEntry($"🧹 Mining log cleared at {DateTime.Parse("2025-07-31 13:29:22"):HH:mm:ss}");
             }
             catch (Exception ex)
             {
@@ -1542,7 +1542,7 @@ namespace MineRefine
             {
                 if (GameLogPanel == null) return;
 
-                var timestamp = DateTime.Parse("2025-06-07 08:51:01").ToString("HH:mm:ss");
+                var timestamp = DateTime.Parse("2025-07-31 13:29:22").ToString("HH:mm:ss");
                 var logEntry = new TextBlock
                 {
                     Text = $"[{timestamp}] {message}",
@@ -1584,8 +1584,6 @@ namespace MineRefine
             }
             return null;
         }
-
-        private DispatcherTimer? _loadingTimer;
 
         private void ShowLoading(string message = "Loading...")
         {

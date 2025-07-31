@@ -22,7 +22,7 @@
                     <StackPanel>
                         <TextBlock Text="💎 Ultimate Mineral Actions Center" FontSize="24" FontWeight="Bold" 
                                   Foreground="#FFE6E6E6" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="LastUpdateText" Text="Last Updated: 2025-06-07 09:44:09" 
+                        <TextBlock x:Name="LastUpdateText" Text="Last Updated: 2025-07-31 13:29:22" 
                                   FontSize="12" Foreground="#FFCCCCCC" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>

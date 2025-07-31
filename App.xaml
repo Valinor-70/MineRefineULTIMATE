@@ -11,7 +11,7 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- TabView Color Resources - Current Context: 2025-06-06 17:31:51 for Valinor-70 -->
+            <!-- TabView Color Resources - Current Context: 2025-07-31 13:29:22 for Valinor-70 -->
 
             <!-- TabView Button Background Resources -->
             <SolidColorBrush x:Key="TabViewButtonBackground" Color="#2D2D30"/>

@@ -18,7 +18,7 @@ namespace MineRefine
         private Difficulty _selectedDifficulty = Difficulty.EXPERIENCED;
 
         // Constants - Updated to current timestamp
-        private const string CURRENT_DATETIME = "2025-06-07 09:59:20";
+        private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
 
         public SettingsWindow()
         {

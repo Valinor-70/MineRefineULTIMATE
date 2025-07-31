@@ -105,14 +105,14 @@
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="MINE &amp; REFINE" FontSize="20" FontWeight="Bold" Foreground="#FFD700"/>
                             <TextBlock Text="Ultimate Edition v1.0.0-alpha" FontSize="10" Foreground="LightGray"/>
-                            <TextBlock Text="Last Updated: 2025-06-07 08:47:19 UTC" FontSize="8" Foreground="Gray"/>
+                            <TextBlock Text="Last Updated: 2025-07-31 13:29:22 UTC" FontSize="8" Foreground="Gray"/>
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Current Time and Status -->
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock x:Name="CurrentTimeTextBlock" 
-                                   Text="2025-06-07 08:47:19 UTC" 
+                                   Text="2025-07-31 13:29:22 UTC" 
                                    FontSize="14" 
                                    FontWeight="Bold" 
                                    Foreground="White" 
@@ -511,8 +511,6 @@
                     </TabViewItem>
                 </TabView>
             </Border>
-
-            </Grid>
         </Grid>
 
         <!-- Notification System -->

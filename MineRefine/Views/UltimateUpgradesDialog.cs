@@ -22,7 +22,7 @@ namespace MineRefine.Views
         private bool _disposed = false;
 
         // Constants - Updated to current timestamp
-        private const string CURRENT_DATETIME = "2025-06-06 21:39:17";
+        private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
         private const string CURRENT_USER = "Valinor-70";
 
         // Fixed constructor parameter

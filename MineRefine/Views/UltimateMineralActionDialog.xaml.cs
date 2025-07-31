@@ -15,7 +15,7 @@ namespace MineRefine.Views
     public sealed partial class UltimateMineralActionDialog : Window, IDisposable
     {
         // Constants - Updated to current timestamp
-        private const string CURRENT_DATETIME = "2025-06-07 09:50:08";
+        private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
         private const string CURRENT_USER = "Valinor-70";
 
         private readonly DataService _dataService;
