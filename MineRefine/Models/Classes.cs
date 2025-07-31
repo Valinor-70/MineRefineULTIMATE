@@ -116,6 +116,54 @@ namespace MineRefine.Models
         Market
     }
 
+    public enum SkillCategory
+    {
+        Mining,
+        Equipment,
+        Exploration,
+        Economic,
+        Quantum
+    }
+
+    public enum SkillType
+    {
+        // Mining Skills
+        PickaxeProficiency,
+        StaminaBoost,
+        CriticalMining,
+        DoubleStrike,
+        MineralDetection,
+        SafetyProtocol,
+        
+        // Equipment Skills
+        EquipmentMastery,
+        DurabilityExpert,
+        EfficiencyBoost,
+        RepairSkills,
+        UpgradeOptimization,
+        
+        // Exploration Skills
+        LocationScout,
+        WeatherResistance,
+        RiskAssessment,
+        NavigationExpert,
+        EnvironmentalAwareness,
+        
+        // Economic Skills
+        MarketAnalyst,
+        NegotiationExpert,
+        ResourceManager,
+        InvestmentStrategist,
+        ProfitMaximizer,
+        
+        // Quantum Skills
+        QuantumResonance,
+        DimensionalAwareness,
+        TemporalStability,
+        RealityManipulation,
+        CosmicInsight
+    }
+
     #endregion
 
     #region Core Player System
@@ -161,6 +209,13 @@ namespace MineRefine.Models
         public List<GameSession> SessionHistory { get; set; } = new();
         public Dictionary<string, int> WeatherEncounters { get; set; } = new();
         public Dictionary<string, double> LocationSuccessRates { get; set; } = new();
+
+        // Phase 2: Skills and Achievements
+        public Dictionary<string, int> SkillLevels { get; set; } = new();
+        public List<string> AchievementProgress { get; set; } = new();
+        public int TotalAchievementPoints { get; set; } = 0;
+        public WeatherCondition CurrentWeather { get; set; } = WeatherCondition.Clear;
+        public DateTime LastWeatherChange { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
 
         // Upgrades and Equipment
         public bool PowerDrill { get; set; } = false;
@@ -817,10 +872,12 @@ namespace MineRefine.Models
         public string Difficulty { get; set; } = "Normal";
         public bool IsCompleted { get; set; } = false;
         public bool IsSecret { get; set; } = false;
+        public bool IsHidden { get; set; } = false;
         public DateTime? CompletedDate { get; set; }
         public string? CompletedBy { get; set; }
         public DateTime? UnlockedDate { get; set; }
         public double ProgressPercentage { get; set; } = 0.0;
+        public long CurrentProgress { get; set; } = 0;
 
         // Enhanced Properties
         public List<string> Prerequisites { get; set; } = new();
@@ -833,6 +890,7 @@ namespace MineRefine.Models
         {
             if (IsCompleted || Target == 0) return;
 
+            CurrentProgress = currentValue;
             ProgressPercentage = Math.Min(100.0, ((double)currentValue / Target) * 100.0);
 
             if (currentValue >= Target && !IsCompleted)
@@ -846,6 +904,7 @@ namespace MineRefine.Models
             IsCompleted = true;
             CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
             CompletedBy = "Valinor-70";
+            CurrentProgress = Target;
             ProgressPercentage = 100.0;
         }
 
@@ -1546,7 +1605,286 @@ namespace MineRefine.Models
 
     #endregion
 
-    #region Extension Methods
+    #region Skills System (Phase 2)
+
+    public class Skill : INotifyPropertyChanged
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public SkillCategory Category { get; set; }
+        public SkillType Type { get; set; }
+        public int Level { get; set; } = 0;
+        public int MaxLevel { get; set; } = 10;
+        public int SkillPointCost { get; set; } = 1;
+        public List<string> Prerequisites { get; set; } = new();
+        public Dictionary<string, double> Bonuses { get; set; } = new();
+        public bool IsUnlocked { get; set; } = false;
+        public bool IsMaxed => Level >= MaxLevel;
+        public string Icon { get; set; } = "⚡";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void LevelUp()
+        {
+            if (Level < MaxLevel)
+            {
+                Level++;
+                OnPropertyChanged(nameof(Level));
+                OnPropertyChanged(nameof(IsMaxed));
+            }
+        }
+
+        public double GetBonusValue(string bonusType)
+        {
+            return Bonuses.GetValueOrDefault(bonusType, 0.0) * Level;
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class SkillTree
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<Skill> Skills { get; set; } = new();
+        public Dictionary<SkillCategory, List<Skill>> SkillsByCategory { get; set; } = new();
+
+        public void InitializeSkills()
+        {
+            // Mining Skills
+            var miningSkills = new List<Skill>
+            {
+                new Skill { Id = "pickaxe_prof", Name = "Pickaxe Proficiency", Description = "Increases mining efficiency by 10% per level", Category = SkillCategory.Mining, Type = SkillType.PickaxeProficiency, Icon = "⛏️", Bonuses = new() { ["mining_efficiency"] = 0.1 } },
+                new Skill { Id = "stamina_boost", Name = "Endurance Training", Description = "Increases maximum stamina by 5 per level", Category = SkillCategory.Mining, Type = SkillType.StaminaBoost, Icon = "💪", Bonuses = new() { ["max_stamina"] = 5.0 } },
+                new Skill { Id = "critical_mining", Name = "Critical Strike", Description = "5% chance per level to double mining rewards", Category = SkillCategory.Mining, Type = SkillType.CriticalMining, Icon = "💥", Bonuses = new() { ["critical_chance"] = 0.05 } },
+                new Skill { Id = "double_strike", Name = "Double Strike", Description = "Chance to mine twice in one operation", Category = SkillCategory.Mining, Type = SkillType.DoubleStrike, Icon = "⚡", Prerequisites = new() { "critical_mining" }, Bonuses = new() { ["double_strike_chance"] = 0.03 } },
+                new Skill { Id = "mineral_detection", Name = "Mineral Sense", Description = "Increases rare mineral find rate by 2% per level", Category = SkillCategory.Mining, Type = SkillType.MineralDetection, Icon = "🔍", Bonuses = new() { ["rare_mineral_chance"] = 0.02 } },
+                new Skill { Id = "safety_protocol", Name = "Safety First", Description = "Reduces mining failure chance by 5% per level", Category = SkillCategory.Mining, Type = SkillType.SafetyProtocol, Icon = "🛡️", Bonuses = new() { ["safety_bonus"] = 0.05 } }
+            };
+
+            // Equipment Skills
+            var equipmentSkills = new List<Skill>
+            {
+                new Skill { Id = "equipment_mastery", Name = "Equipment Mastery", Description = "All equipment bonuses increased by 15% per level", Category = SkillCategory.Equipment, Type = SkillType.EquipmentMastery, Icon = "⚒️", Bonuses = new() { ["equipment_bonus"] = 0.15 } },
+                new Skill { Id = "durability_expert", Name = "Durability Expert", Description = "Equipment degrades 10% slower per level", Category = SkillCategory.Equipment, Type = SkillType.DurabilityExpert, Icon = "🔧", Bonuses = new() { ["durability_bonus"] = 0.1 } },
+                new Skill { Id = "efficiency_boost", Name = "Efficiency Enhancement", Description = "Reduces stamina cost by 5% per level", Category = SkillCategory.Equipment, Type = SkillType.EfficiencyBoost, Icon = "⚡", Bonuses = new() { ["stamina_efficiency"] = 0.05 } },
+                new Skill { Id = "repair_skills", Name = "Field Repair", Description = "Ability to repair equipment without returning to base", Category = SkillCategory.Equipment, Type = SkillType.RepairSkills, Icon = "🔨", Prerequisites = new() { "durability_expert" } },
+                new Skill { Id = "upgrade_optimization", Name = "Upgrade Optimization", Description = "Equipment upgrades cost 10% less per level", Category = SkillCategory.Equipment, Type = SkillType.UpgradeOptimization, Icon = "💰", Bonuses = new() { ["upgrade_discount"] = 0.1 } }
+            };
+
+            // Exploration Skills
+            var explorationSkills = new List<Skill>
+            {
+                new Skill { Id = "location_scout", Name = "Location Scout", Description = "Unlocks new mining locations faster", Category = SkillCategory.Exploration, Type = SkillType.LocationScout, Icon = "🗺️", Bonuses = new() { ["location_unlock_bonus"] = 1.0 } },
+                new Skill { Id = "weather_resistance", Name = "Weather Resistance", Description = "Reduces weather penalties by 10% per level", Category = SkillCategory.Exploration, Type = SkillType.WeatherResistance, Icon = "🌤️", Bonuses = new() { ["weather_resistance"] = 0.1 } },
+                new Skill { Id = "risk_assessment", Name = "Risk Assessment", Description = "Better risk vs reward calculations", Category = SkillCategory.Exploration, Type = SkillType.RiskAssessment, Icon = "⚠️", Bonuses = new() { ["risk_bonus"] = 0.05 } },
+                new Skill { Id = "navigation_expert", Name = "Navigation Expert", Description = "Travel between locations costs less stamina", Category = SkillCategory.Exploration, Type = SkillType.NavigationExpert, Icon = "🧭", Bonuses = new() { ["travel_efficiency"] = 0.15 } },
+                new Skill { Id = "environmental_awareness", Name = "Environmental Awareness", Description = "Predicts environmental changes", Category = SkillCategory.Exploration, Type = SkillType.EnvironmentalAwareness, Icon = "🌍", Prerequisites = new() { "weather_resistance" } }
+            };
+
+            // Economic Skills
+            var economicSkills = new List<Skill>
+            {
+                new Skill { Id = "market_analyst", Name = "Market Analyst", Description = "Increases mineral sale prices by 5% per level", Category = SkillCategory.Economic, Type = SkillType.MarketAnalyst, Icon = "📈", Bonuses = new() { ["sale_price_bonus"] = 0.05 } },
+                new Skill { Id = "negotiation_expert", Name = "Negotiation Expert", Description = "Better equipment purchase prices", Category = SkillCategory.Economic, Type = SkillType.NegotiationExpert, Icon = "🤝", Bonuses = new() { ["purchase_discount"] = 0.08 } },
+                new Skill { Id = "resource_manager", Name = "Resource Manager", Description = "More efficient use of consumables", Category = SkillCategory.Economic, Type = SkillType.ResourceManager, Icon = "📦", Bonuses = new() { ["resource_efficiency"] = 0.1 } },
+                new Skill { Id = "investment_strategist", Name = "Investment Strategist", Description = "Generates passive income", Category = SkillCategory.Economic, Type = SkillType.InvestmentStrategist, Icon = "💎", Prerequisites = new() { "market_analyst" }, Bonuses = new() { ["passive_income"] = 100.0 } },
+                new Skill { Id = "profit_maximizer", Name = "Profit Maximizer", Description = "All income increased by 3% per level", Category = SkillCategory.Economic, Type = SkillType.ProfitMaximizer, Icon = "💰", Prerequisites = new() { "negotiation_expert", "resource_manager" }, Bonuses = new() { ["income_multiplier"] = 0.03 } }
+            };
+
+            // Quantum Skills
+            var quantumSkills = new List<Skill>
+            {
+                new Skill { Id = "quantum_resonance", Name = "Quantum Resonance", Description = "Increases quantum material discovery by 15% per level", Category = SkillCategory.Quantum, Type = SkillType.QuantumResonance, Icon = "🌌", Bonuses = new() { ["quantum_discovery"] = 0.15 } },
+                new Skill { Id = "dimensional_awareness", Name = "Dimensional Awareness", Description = "Unlocks interdimensional mining capabilities", Category = SkillCategory.Quantum, Type = SkillType.DimensionalAwareness, Icon = "🌀", Prerequisites = new() { "quantum_resonance" } },
+                new Skill { Id = "temporal_stability", Name = "Temporal Stability", Description = "Reduces quantum realm risks", Category = SkillCategory.Quantum, Type = SkillType.TemporalStability, Icon = "⏰", Prerequisites = new() { "dimensional_awareness" }, Bonuses = new() { ["quantum_safety"] = 0.1 } },
+                new Skill { Id = "reality_manipulation", Name = "Reality Manipulation", Description = "Alters probability outcomes in your favor", Category = SkillCategory.Quantum, Type = SkillType.RealityManipulation, Icon = "🔮", Prerequisites = new() { "temporal_stability" }, Bonuses = new() { ["probability_modifier"] = 0.05 } },
+                new Skill { Id = "cosmic_insight", Name = "Cosmic Insight", Description = "Ultimate quantum mastery - unlocks cosmic-tier rewards", Category = SkillCategory.Quantum, Type = SkillType.CosmicInsight, Icon = "✨", Prerequisites = new() { "reality_manipulation" }, MaxLevel = 5, SkillPointCost = 5 }
+            };
+
+            Skills.AddRange(miningSkills);
+            Skills.AddRange(equipmentSkills);
+            Skills.AddRange(explorationSkills);
+            Skills.AddRange(economicSkills);
+            Skills.AddRange(quantumSkills);
+
+            // Organize skills by category
+            SkillsByCategory[SkillCategory.Mining] = miningSkills;
+            SkillsByCategory[SkillCategory.Equipment] = equipmentSkills;
+            SkillsByCategory[SkillCategory.Exploration] = explorationSkills;
+            SkillsByCategory[SkillCategory.Economic] = economicSkills;
+            SkillsByCategory[SkillCategory.Quantum] = quantumSkills;
+        }
+    }
+
+    #endregion
+
+    #region Achievements System (Phase 2)
+
+    public class AchievementSystem
+    {
+        public List<Achievement> Achievements { get; set; } = new();
+        public Dictionary<string, Achievement> AchievementMap { get; set; } = new();
+
+        public void InitializeAchievements()
+        {
+            var achievements = new List<Achievement>
+            {
+                // Mining Achievements
+                new Achievement { Id = "first_mine", Name = "First Strike", Description = "Complete your first mining operation", Type = AchievementType.TotalMines, Target = 1, Icon = "⛏️", Category = "Mining", Points = 5 },
+                new Achievement { Id = "mining_novice", Name = "Mining Novice", Description = "Complete 10 mining operations", Type = AchievementType.TotalMines, Target = 10, Icon = "🔨", Category = "Mining" },
+                new Achievement { Id = "mining_veteran", Name = "Mining Veteran", Description = "Complete 100 mining operations", Type = AchievementType.TotalMines, Target = 100, Icon = "⚒️", Category = "Mining", Points = 25 },
+                new Achievement { Id = "mining_master", Name = "Mining Master", Description = "Complete 1000 mining operations", Type = AchievementType.TotalMines, Target = 1000, Icon = "👑", Category = "Mining", Points = 100 },
+
+                // Financial Achievements
+                new Achievement { Id = "first_thousand", Name = "First Thousand", Description = "Earn your first £1,000", Type = AchievementType.TotalMoney, Target = 1000, Icon = "💰", Category = "Financial" },
+                new Achievement { Id = "wealthy_miner", Name = "Wealthy Miner", Description = "Accumulate £100,000", Type = AchievementType.TotalMoney, Target = 100000, Icon = "💎", Category = "Financial", Points = 50 },
+                new Achievement { Id = "millionaire", Name = "Millionaire Miner", Description = "Reach £1,000,000 in total earnings", Type = AchievementType.TotalMoney, Target = 1000000, Icon = "🏆", Category = "Financial", Points = 200 },
+
+                // Discovery Achievements
+                new Achievement { Id = "rare_finder", Name = "Rare Find", Description = "Discover a rare mineral", Type = AchievementType.SpecificMineral, Target = 1, Icon = "💍", Category = "Discovery" },
+                new Achievement { Id = "legendary_finder", Name = "Legendary Discovery", Description = "Find a legendary mineral", Type = AchievementType.SpecificMineral, Target = 1, Icon = "✨", Category = "Discovery", Points = 75 },
+                new Achievement { Id = "quantum_explorer", Name = "Quantum Explorer", Description = "Discover quantum materials", Type = AchievementType.QuantumMastery, Target = 10, Icon = "🌌", Category = "Discovery", Points = 150 },
+
+                // Location Achievements
+                new Achievement { Id = "surface_explorer", Name = "Surface Explorer", Description = "Complete 50 operations at Surface Mine", Type = AchievementType.LocationDiscovery, Target = 50, Icon = "🏔️", Category = "Exploration" },
+                new Achievement { Id = "cave_dweller", Name = "Cave Dweller", Description = "Master the Underground Caverns", Type = AchievementType.LocationDiscovery, Target = 100, Icon = "🕳️", Category = "Exploration", Points = 30 },
+                new Achievement { Id = "volcano_survivor", Name = "Volcano Survivor", Description = "Survive 25 operations in Volcanic Depths", Type = AchievementType.LocationDiscovery, Target = 25, Icon = "🌋", Category = "Exploration", Points = 60 },
+                new Achievement { Id = "quantum_master", Name = "Quantum Realm Master", Description = "Conquer the Quantum Realm", Type = AchievementType.LocationUnlock, Target = 1, Icon = "⚡", Category = "Exploration", Points = 100 },
+
+                // Skill Achievements
+                new Achievement { Id = "skill_learner", Name = "Skill Learner", Description = "Spend your first skill point", Type = AchievementType.SkillPoints, Target = 1, Icon = "📚", Category = "Skills" },
+                new Achievement { Id = "skill_expert", Name = "Skill Expert", Description = "Max out your first skill", Type = AchievementType.SkillPoints, Target = 10, Icon = "🎓", Category = "Skills", Points = 25 },
+                new Achievement { Id = "skill_master", Name = "Skill Master", Description = "Max out 5 different skills", Type = AchievementType.SkillPoints, Target = 50, Icon = "🧠", Category = "Skills", Points = 100 },
+
+                // Special Achievements
+                new Achievement { Id = "weather_warrior", Name = "Weather Warrior", Description = "Mine successfully in all weather conditions", Type = AchievementType.WeatherSurvival, Target = 12, Icon = "🌦️", Category = "Special", Points = 40 },
+                new Achievement { Id = "streak_master", Name = "Streak Master", Description = "Achieve 25 consecutive successful mines", Type = AchievementType.ConsecutiveSuccess, Target = 25, Icon = "🔥", Category = "Special", Points = 50 },
+                new Achievement { Id = "risk_taker", Name = "Risk Taker", Description = "Successfully complete 10 maximum risk operations", Type = AchievementType.ConsecutiveMines, Target = 10, Icon = "🎲", Category = "Special", Points = 75 },
+
+                // Hidden Achievements
+                new Achievement { Id = "secret_chamber", Name = "Secret Chamber", Description = "Discover the hidden chamber", Type = AchievementType.LocationDiscovery, Target = 1, Icon = "🗝️", Category = "Hidden", IsHidden = true, Points = 500 },
+                new Achievement { Id = "time_traveler", Name = "Time Traveler", Description = "Experience a temporal anomaly", Type = AchievementType.QuantumMastery, Target = 1, Icon = "⏰", Category = "Hidden", IsHidden = true, Points = 1000 },
+                new Achievement { Id = "reality_bender", Name = "Reality Bender", Description = "Alter the fundamental laws of physics", Type = AchievementType.QuantumMastery, Target = 100, Icon = "🔮", Category = "Hidden", IsHidden = true, Points = 2000 }
+            };
+
+            Achievements = achievements;
+            AchievementMap = achievements.ToDictionary(a => a.Id, a => a);
+        }
+
+        public List<Achievement> GetAchievementsByCategory(string category)
+        {
+            return Achievements.Where(a => a.Category == category && (!a.IsHidden || a.IsCompleted)).ToList();
+        }
+
+        public List<Achievement> GetCompletedAchievements()
+        {
+            return Achievements.Where(a => a.IsCompleted).ToList();
+        }
+
+        public int GetTotalAchievementPoints()
+        {
+            return GetCompletedAchievements().Sum(a => a.Points);
+        }
+
+        public double GetCompletionPercentage()
+        {
+            var visibleAchievements = Achievements.Where(a => !a.IsHidden).ToList();
+            if (!visibleAchievements.Any()) return 0.0;
+            
+            return (double)visibleAchievements.Count(a => a.IsCompleted) / visibleAchievements.Count * 100.0;
+        }
+    }
+
+    #endregion
+
+    #region Weather System (Phase 2)
+
+    public class WeatherSystem
+    {
+        private readonly Random _random = new();
+        public WeatherCondition CurrentWeather { get; private set; } = WeatherCondition.Clear;
+        public DateTime LastWeatherChange { get; private set; } = DateTime.Parse("2025-07-31 13:29:22");
+        public int WeatherDuration { get; private set; } = 30; // minutes
+        public Dictionary<WeatherCondition, WeatherEffect> WeatherEffects { get; private set; } = new();
+
+        public void InitializeWeatherEffects()
+        {
+            WeatherEffects = new Dictionary<WeatherCondition, WeatherEffect>
+            {
+                [WeatherCondition.Clear] = new WeatherEffect { Name = "Clear", Description = "Perfect mining conditions", Icon = "☀️", MiningEfficiency = 1.0, SafetyModifier = 1.0, StaminaCost = 1.0 },
+                [WeatherCondition.Cloudy] = new WeatherEffect { Name = "Cloudy", Description = "Slightly reduced visibility", Icon = "☁️", MiningEfficiency = 0.95, SafetyModifier = 0.98, StaminaCost = 1.05 },
+                [WeatherCondition.Rainy] = new WeatherEffect { Name = "Rainy", Description = "Slippery conditions, equipment degradation", Icon = "🌧️", MiningEfficiency = 0.85, SafetyModifier = 0.9, StaminaCost = 1.15 },
+                [WeatherCondition.Stormy] = new WeatherEffect { Name = "Stormy", Description = "Dangerous conditions, high risk", Icon = "⛈️", MiningEfficiency = 0.7, SafetyModifier = 0.75, StaminaCost = 1.3 },
+                [WeatherCondition.Foggy] = new WeatherEffect { Name = "Foggy", Description = "Very poor visibility", Icon = "🌫️", MiningEfficiency = 0.8, SafetyModifier = 0.85, StaminaCost = 1.2 },
+                [WeatherCondition.Snowy] = new WeatherEffect { Name = "Snowy", Description = "Cold conditions, reduced mobility", Icon = "❄️", MiningEfficiency = 0.75, SafetyModifier = 0.8, StaminaCost = 1.25 },
+                [WeatherCondition.Windy] = new WeatherEffect { Name = "Windy", Description = "Equipment instability", Icon = "💨", MiningEfficiency = 0.9, SafetyModifier = 0.92, StaminaCost = 1.1 },
+                [WeatherCondition.QuantumFlux] = new WeatherEffect { Name = "Quantum Flux", Description = "Reality distortion enhances quantum materials", Icon = "🌀", MiningEfficiency = 1.5, SafetyModifier = 0.6, StaminaCost = 1.4, QuantumBonus = 2.0 },
+                [WeatherCondition.TemporalStorm] = new WeatherEffect { Name = "Temporal Storm", Description = "Time distortion affects all operations", Icon = "⏰", MiningEfficiency = 0.5, SafetyModifier = 0.4, StaminaCost = 2.0, QuantumBonus = 3.0 },
+                [WeatherCondition.RealityDistortion] = new WeatherEffect { Name = "Reality Distortion", Description = "Laws of physics are unstable", Icon = "🔮", MiningEfficiency = 2.0, SafetyModifier = 0.3, StaminaCost = 1.8, QuantumBonus = 4.0 },
+                [WeatherCondition.CosmicRadiation] = new WeatherEffect { Name = "Cosmic Radiation", Description = "Cosmic energy enhances rare finds", Icon = "☢️", MiningEfficiency = 1.2, SafetyModifier = 0.7, StaminaCost = 1.3, RareBonus = 1.5 },
+                [WeatherCondition.DimensionalRift] = new WeatherEffect { Name = "Dimensional Rift", Description = "Portal to other dimensions opens", Icon = "🌌", MiningEfficiency = 3.0, SafetyModifier = 0.2, StaminaCost = 2.5, QuantumBonus = 5.0 }
+            };
+        }
+
+        public void UpdateWeather()
+        {
+            var timeSinceLastChange = DateTime.Parse("2025-07-31 13:29:22").Subtract(LastWeatherChange).TotalMinutes;
+            if (timeSinceLastChange >= WeatherDuration)
+            {
+                ChangeWeather();
+            }
+        }
+
+        public void ChangeWeather()
+        {
+            var allWeathers = Enum.GetValues<WeatherCondition>().ToList();
+            var normalWeathers = allWeathers.Where(w => (int)w < 8).ToList(); // First 8 are normal weather
+            var quantumWeathers = allWeathers.Where(w => (int)w >= 8).ToList(); // Rest are quantum weather
+
+            // 85% chance for normal weather, 15% for quantum weather
+            var useQuantumWeather = _random.NextDouble() < 0.15;
+            var weatherPool = useQuantumWeather ? quantumWeathers : normalWeathers;
+            
+            var newWeather = weatherPool[_random.Next(weatherPool.Count)];
+            
+            // Avoid same weather twice in a row
+            if (newWeather == CurrentWeather && weatherPool.Count > 1)
+            {
+                newWeather = weatherPool.Where(w => w != CurrentWeather).ToList()[_random.Next(weatherPool.Count - 1)];
+            }
+
+            CurrentWeather = newWeather;
+            LastWeatherChange = DateTime.Parse("2025-07-31 13:29:22");
+            
+            // Set duration based on weather type
+            WeatherDuration = useQuantumWeather ? _random.Next(5, 15) : _random.Next(15, 45);
+        }
+
+        public WeatherEffect GetCurrentWeatherEffect()
+        {
+            return WeatherEffects.GetValueOrDefault(CurrentWeather, WeatherEffects[WeatherCondition.Clear]);
+        }
+    }
+
+    public class WeatherEffect
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Icon { get; set; } = "☀️";
+        public double MiningEfficiency { get; set; } = 1.0;
+        public double SafetyModifier { get; set; } = 1.0;
+        public double StaminaCost { get; set; } = 1.0;
+        public double QuantumBonus { get; set; } = 1.0;
+        public double RareBonus { get; set; } = 1.0;
+    }
+
+    #endregion
+
+    #region Validation Utils
 
     public static class ExtensionMethods
     {

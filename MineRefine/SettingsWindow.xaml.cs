@@ -27,7 +27,23 @@ namespace MineRefine
             _gameSettings = new GameSettings
             {
                 CurrentUser = "Valinor-70",
-                LastUpdated = DateTime.Parse(CURRENT_DATETIME)
+                LastUpdated = DateTime.Parse(CURRENT_DATETIME),
+                // Ensure all critical settings have proper defaults
+                MasterVolume = 0.8,
+                SoundEffects = true,
+                BackgroundMusic = true,
+                AnimationSpeed = 1.0,
+                ReducedAnimations = false,
+                HighContrast = false,
+                ParticleEffects = true,
+                AutoSave = true,
+                AutoSaveInterval = 30,
+                ShowTutorials = true,
+                ShowTooltips = true,
+                AutoMiningEnabled = false,
+                AutoMiningInterval = 3,
+                NotifyOnRareFinds = true,
+                ShowMiningParticles = true
             };
 
             this.Title = "Mine & Refine - Game Setup";
@@ -179,7 +195,8 @@ namespace MineRefine
                 var playerName = PlayerNameTextBox.Text?.Trim() ?? "Anonymous Miner";
                 var avatar = GetSelectedAvatar();
 
-                _currentPlayer = await _dataService.CreateNewPlayerAsync(playerName, _selectedDifficulty, avatar);
+                _currentPlayer = await _dataService.CreateNewPlayerAsync(playerName, _selectedDifficulty);
+                _currentPlayer.Avatar = avatar;
 
                 // Apply game settings
                 _gameSettings.MasterVolume = VolumeSlider.Value / 100.0;
@@ -206,17 +223,39 @@ namespace MineRefine
                 ShowLoading("Launching mining operations...");
                 await Task.Delay(1500); // Show loading for effect
 
+                // Validate we have required data
+                if (_currentPlayer == null)
+                {
+                    throw new InvalidOperationException("Player data is null - cannot start game");
+                }
+
+                if (_gameSettings == null)
+                {
+                    throw new InvalidOperationException("Game settings are null - cannot start game");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"LaunchMainGame: Starting with player {_currentPlayer.Name}, difficulty {_currentPlayer.Difficulty}");
+
                 // Launch main window
                 var mainWindow = new MainWindow(_currentPlayer, _gameSettings);
+                System.Diagnostics.Debug.WriteLine("LaunchMainGame: MainWindow created successfully");
+                
                 mainWindow.Activate();
+                System.Diagnostics.Debug.WriteLine("LaunchMainGame: MainWindow activated successfully");
 
                 // Close settings window
                 this.Close();
+                System.Diagnostics.Debug.WriteLine("LaunchMainGame: SettingsWindow closed successfully");
             }
             catch (Exception ex)
             {
                 HideLoading();
                 System.Diagnostics.Debug.WriteLine($"LaunchMainGame error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"LaunchMainGame stack trace: {ex.StackTrace}");
+                
+                // Show error to user
+                SaveStatusTextBlock.Text = $"Failed to start game: {ex.Message}";
+                SaveStatusTextBlock.Foreground = new SolidColorBrush(Colors.Red);
             }
         }
 
