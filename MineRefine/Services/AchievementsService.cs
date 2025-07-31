@@ -204,7 +204,7 @@ namespace MineRefine.Services
                     if (!wasCompleted && achievement.IsCompleted)
                     {
                         OnAchievementUnlocked(achievement);
-                        player.TotalAchievementPoints += achievement.PointValue;
+                        player.TotalAchievementPoints += achievement.Points;
                         if (!player.CompletedAchievements.Contains(achievement.Id))
                         {
                             player.CompletedAchievements.Add(achievement.Id);
@@ -247,7 +247,7 @@ namespace MineRefine.Services
                 {
                     achievement.IsCompleted = true;
                     achievement.CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
-                    achievement.CurrentProgress = achievement.RequiredValue;
+                    achievement.CurrentProgress = achievement.Target;
                 }
             }
         }

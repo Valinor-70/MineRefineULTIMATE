@@ -2485,9 +2485,9 @@ namespace MineRefine
             });
 
             // Progress
-            if (!achievement.IsCompleted && achievement.RequiredValue > 0)
+            if (!achievement.IsCompleted && achievement.Target > 0)
             {
-                var progressText = $"Progress: {achievement.CurrentProgress}/{achievement.RequiredValue}";
+                var progressText = $"Progress: {achievement.CurrentProgress}/{achievement.Target}";
                 contentPanel.Children.Add(new TextBlock 
                 { 
                     Text = progressText, 
@@ -2498,7 +2498,7 @@ namespace MineRefine
                 var progressBar = new ProgressBar
                 {
                     Minimum = 0,
-                    Maximum = achievement.RequiredValue,
+                    Maximum = achievement.Target,
                     Value = achievement.CurrentProgress,
                     Height = 6,
                     Foreground = new SolidColorBrush(Colors.Gold)
@@ -2512,7 +2512,7 @@ namespace MineRefine
             var pointsPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
             pointsPanel.Children.Add(new TextBlock 
             { 
-                Text = $"{achievement.PointValue}", 
+                Text = $"{achievement.Points}", 
                 FontSize = 16, 
                 FontWeight = FontWeights.Bold, 
                 Foreground = new SolidColorBrush(Colors.Gold),

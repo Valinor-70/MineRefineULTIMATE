@@ -876,6 +876,7 @@ namespace MineRefine.Models
         public string? CompletedBy { get; set; }
         public DateTime? UnlockedDate { get; set; }
         public double ProgressPercentage { get; set; } = 0.0;
+        public long CurrentProgress { get; set; } = 0;
 
         // Enhanced Properties
         public List<string> Prerequisites { get; set; } = new();
@@ -888,6 +889,7 @@ namespace MineRefine.Models
         {
             if (IsCompleted || Target == 0) return;
 
+            CurrentProgress = currentValue;
             ProgressPercentage = Math.Min(100.0, ((double)currentValue / Target) * 100.0);
 
             if (currentValue >= Target && !IsCompleted)
@@ -901,6 +903,7 @@ namespace MineRefine.Models
             IsCompleted = true;
             CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
             CompletedBy = "Valinor-70";
+            CurrentProgress = Target;
             ProgressPercentage = 100.0;
         }
 
@@ -1730,41 +1733,41 @@ namespace MineRefine.Models
             var achievements = new List<Achievement>
             {
                 // Mining Achievements
-                new Achievement { Id = "first_mine", Name = "First Strike", Description = "Complete your first mining operation", Type = AchievementType.TotalMines, RequiredValue = 1, Icon = "⛏️", Category = "Mining", PointValue = 5 },
-                new Achievement { Id = "mining_novice", Name = "Mining Novice", Description = "Complete 10 mining operations", Type = AchievementType.TotalMines, RequiredValue = 10, Icon = "🔨", Category = "Mining" },
-                new Achievement { Id = "mining_veteran", Name = "Mining Veteran", Description = "Complete 100 mining operations", Type = AchievementType.TotalMines, RequiredValue = 100, Icon = "⚒️", Category = "Mining", PointValue = 25 },
-                new Achievement { Id = "mining_master", Name = "Mining Master", Description = "Complete 1000 mining operations", Type = AchievementType.TotalMines, RequiredValue = 1000, Icon = "👑", Category = "Mining", PointValue = 100 },
+                new Achievement { Id = "first_mine", Name = "First Strike", Description = "Complete your first mining operation", Type = AchievementType.TotalMines, Target = 1, Icon = "⛏️", Category = "Mining", Points = 5 },
+                new Achievement { Id = "mining_novice", Name = "Mining Novice", Description = "Complete 10 mining operations", Type = AchievementType.TotalMines, Target = 10, Icon = "🔨", Category = "Mining" },
+                new Achievement { Id = "mining_veteran", Name = "Mining Veteran", Description = "Complete 100 mining operations", Type = AchievementType.TotalMines, Target = 100, Icon = "⚒️", Category = "Mining", Points = 25 },
+                new Achievement { Id = "mining_master", Name = "Mining Master", Description = "Complete 1000 mining operations", Type = AchievementType.TotalMines, Target = 1000, Icon = "👑", Category = "Mining", Points = 100 },
 
                 // Financial Achievements
-                new Achievement { Id = "first_thousand", Name = "First Thousand", Description = "Earn your first £1,000", Type = AchievementType.TotalMoney, RequiredValue = 1000, Icon = "💰", Category = "Financial" },
-                new Achievement { Id = "wealthy_miner", Name = "Wealthy Miner", Description = "Accumulate £100,000", Type = AchievementType.TotalMoney, RequiredValue = 100000, Icon = "💎", Category = "Financial", PointValue = 50 },
-                new Achievement { Id = "millionaire", Name = "Millionaire Miner", Description = "Reach £1,000,000 in total earnings", Type = AchievementType.TotalMoney, RequiredValue = 1000000, Icon = "🏆", Category = "Financial", PointValue = 200 },
+                new Achievement { Id = "first_thousand", Name = "First Thousand", Description = "Earn your first £1,000", Type = AchievementType.TotalMoney, Target = 1000, Icon = "💰", Category = "Financial" },
+                new Achievement { Id = "wealthy_miner", Name = "Wealthy Miner", Description = "Accumulate £100,000", Type = AchievementType.TotalMoney, Target = 100000, Icon = "💎", Category = "Financial", Points = 50 },
+                new Achievement { Id = "millionaire", Name = "Millionaire Miner", Description = "Reach £1,000,000 in total earnings", Type = AchievementType.TotalMoney, Target = 1000000, Icon = "🏆", Category = "Financial", Points = 200 },
 
                 // Discovery Achievements
-                new Achievement { Id = "rare_finder", Name = "Rare Find", Description = "Discover a rare mineral", Type = AchievementType.SpecificMineral, RequiredValue = 1, Icon = "💍", Category = "Discovery" },
-                new Achievement { Id = "legendary_finder", Name = "Legendary Discovery", Description = "Find a legendary mineral", Type = AchievementType.SpecificMineral, RequiredValue = 1, Icon = "✨", Category = "Discovery", PointValue = 75 },
-                new Achievement { Id = "quantum_explorer", Name = "Quantum Explorer", Description = "Discover quantum materials", Type = AchievementType.QuantumMastery, RequiredValue = 10, Icon = "🌌", Category = "Discovery", PointValue = 150 },
+                new Achievement { Id = "rare_finder", Name = "Rare Find", Description = "Discover a rare mineral", Type = AchievementType.SpecificMineral, Target = 1, Icon = "💍", Category = "Discovery" },
+                new Achievement { Id = "legendary_finder", Name = "Legendary Discovery", Description = "Find a legendary mineral", Type = AchievementType.SpecificMineral, Target = 1, Icon = "✨", Category = "Discovery", Points = 75 },
+                new Achievement { Id = "quantum_explorer", Name = "Quantum Explorer", Description = "Discover quantum materials", Type = AchievementType.QuantumMastery, Target = 10, Icon = "🌌", Category = "Discovery", Points = 150 },
 
                 // Location Achievements
-                new Achievement { Id = "surface_explorer", Name = "Surface Explorer", Description = "Complete 50 operations at Surface Mine", Type = AchievementType.LocationDiscovery, RequiredValue = 50, Icon = "🏔️", Category = "Exploration" },
-                new Achievement { Id = "cave_dweller", Name = "Cave Dweller", Description = "Master the Underground Caverns", Type = AchievementType.LocationDiscovery, RequiredValue = 100, Icon = "🕳️", Category = "Exploration", PointValue = 30 },
-                new Achievement { Id = "volcano_survivor", Name = "Volcano Survivor", Description = "Survive 25 operations in Volcanic Depths", Type = AchievementType.LocationDiscovery, RequiredValue = 25, Icon = "🌋", Category = "Exploration", PointValue = 60 },
-                new Achievement { Id = "quantum_master", Name = "Quantum Realm Master", Description = "Conquer the Quantum Realm", Type = AchievementType.LocationUnlock, RequiredValue = 1, Icon = "⚡", Category = "Exploration", PointValue = 100 },
+                new Achievement { Id = "surface_explorer", Name = "Surface Explorer", Description = "Complete 50 operations at Surface Mine", Type = AchievementType.LocationDiscovery, Target = 50, Icon = "🏔️", Category = "Exploration" },
+                new Achievement { Id = "cave_dweller", Name = "Cave Dweller", Description = "Master the Underground Caverns", Type = AchievementType.LocationDiscovery, Target = 100, Icon = "🕳️", Category = "Exploration", Points = 30 },
+                new Achievement { Id = "volcano_survivor", Name = "Volcano Survivor", Description = "Survive 25 operations in Volcanic Depths", Type = AchievementType.LocationDiscovery, Target = 25, Icon = "🌋", Category = "Exploration", Points = 60 },
+                new Achievement { Id = "quantum_master", Name = "Quantum Realm Master", Description = "Conquer the Quantum Realm", Type = AchievementType.LocationUnlock, Target = 1, Icon = "⚡", Category = "Exploration", Points = 100 },
 
                 // Skill Achievements
-                new Achievement { Id = "skill_learner", Name = "Skill Learner", Description = "Spend your first skill point", Type = AchievementType.SkillPoints, RequiredValue = 1, Icon = "📚", Category = "Skills" },
-                new Achievement { Id = "skill_expert", Name = "Skill Expert", Description = "Max out your first skill", Type = AchievementType.SkillPoints, RequiredValue = 10, Icon = "🎓", Category = "Skills", PointValue = 25 },
-                new Achievement { Id = "skill_master", Name = "Skill Master", Description = "Max out 5 different skills", Type = AchievementType.SkillPoints, RequiredValue = 50, Icon = "🧠", Category = "Skills", PointValue = 100 },
+                new Achievement { Id = "skill_learner", Name = "Skill Learner", Description = "Spend your first skill point", Type = AchievementType.SkillPoints, Target = 1, Icon = "📚", Category = "Skills" },
+                new Achievement { Id = "skill_expert", Name = "Skill Expert", Description = "Max out your first skill", Type = AchievementType.SkillPoints, Target = 10, Icon = "🎓", Category = "Skills", Points = 25 },
+                new Achievement { Id = "skill_master", Name = "Skill Master", Description = "Max out 5 different skills", Type = AchievementType.SkillPoints, Target = 50, Icon = "🧠", Category = "Skills", Points = 100 },
 
                 // Special Achievements
-                new Achievement { Id = "weather_warrior", Name = "Weather Warrior", Description = "Mine successfully in all weather conditions", Type = AchievementType.WeatherSurvival, RequiredValue = 12, Icon = "🌦️", Category = "Special", PointValue = 40 },
-                new Achievement { Id = "streak_master", Name = "Streak Master", Description = "Achieve 25 consecutive successful mines", Type = AchievementType.ConsecutiveSuccess, RequiredValue = 25, Icon = "🔥", Category = "Special", PointValue = 50 },
-                new Achievement { Id = "risk_taker", Name = "Risk Taker", Description = "Successfully complete 10 maximum risk operations", Type = AchievementType.ConsecutiveMines, RequiredValue = 10, Icon = "🎲", Category = "Special", PointValue = 75 },
+                new Achievement { Id = "weather_warrior", Name = "Weather Warrior", Description = "Mine successfully in all weather conditions", Type = AchievementType.WeatherSurvival, Target = 12, Icon = "🌦️", Category = "Special", Points = 40 },
+                new Achievement { Id = "streak_master", Name = "Streak Master", Description = "Achieve 25 consecutive successful mines", Type = AchievementType.ConsecutiveSuccess, Target = 25, Icon = "🔥", Category = "Special", Points = 50 },
+                new Achievement { Id = "risk_taker", Name = "Risk Taker", Description = "Successfully complete 10 maximum risk operations", Type = AchievementType.ConsecutiveMines, Target = 10, Icon = "🎲", Category = "Special", Points = 75 },
 
                 // Hidden Achievements
-                new Achievement { Id = "secret_chamber", Name = "Secret Chamber", Description = "Discover the hidden chamber", Type = AchievementType.LocationDiscovery, RequiredValue = 1, Icon = "🗝️", Category = "Hidden", IsHidden = true, PointValue = 500 },
-                new Achievement { Id = "time_traveler", Name = "Time Traveler", Description = "Experience a temporal anomaly", Type = AchievementType.QuantumMastery, RequiredValue = 1, Icon = "⏰", Category = "Hidden", IsHidden = true, PointValue = 1000 },
-                new Achievement { Id = "reality_bender", Name = "Reality Bender", Description = "Alter the fundamental laws of physics", Type = AchievementType.QuantumMastery, RequiredValue = 100, Icon = "🔮", Category = "Hidden", IsHidden = true, PointValue = 2000 }
+                new Achievement { Id = "secret_chamber", Name = "Secret Chamber", Description = "Discover the hidden chamber", Type = AchievementType.LocationDiscovery, Target = 1, Icon = "🗝️", Category = "Hidden", IsHidden = true, Points = 500 },
+                new Achievement { Id = "time_traveler", Name = "Time Traveler", Description = "Experience a temporal anomaly", Type = AchievementType.QuantumMastery, Target = 1, Icon = "⏰", Category = "Hidden", IsHidden = true, Points = 1000 },
+                new Achievement { Id = "reality_bender", Name = "Reality Bender", Description = "Alter the fundamental laws of physics", Type = AchievementType.QuantumMastery, Target = 100, Icon = "🔮", Category = "Hidden", IsHidden = true, Points = 2000 }
             };
 
             Achievements = achievements;
@@ -1783,7 +1786,7 @@ namespace MineRefine.Models
 
         public int GetTotalAchievementPoints()
         {
-            return GetCompletedAchievements().Sum(a => a.PointValue);
+            return GetCompletedAchievements().Sum(a => a.Points);
         }
 
         public double GetCompletionPercentage()
