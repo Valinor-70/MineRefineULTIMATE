@@ -138,9 +138,9 @@ namespace MineRefine.Models
         public double Multiplier { get; set; } = 1.0;
 
         // Timestamps - Updated to current time
-        public DateTime CreatedDate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
-        public DateTime LastPlayed { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
-        public DateTime LastLogin { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime CreatedDate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
+        public DateTime LastPlayed { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
+        public DateTime LastLogin { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
 
         // Location and Progression
         public string CurrentLocationId { get; set; } = "surface_mine";
@@ -213,7 +213,7 @@ namespace MineRefine.Models
         {
             SingleBestMineValue = Math.Max(SingleBestMineValue, value);
 
-            var today = DateTime.Parse("2025-06-07").ToString("yyyy-MM-dd");
+            var today = DateTime.Parse("2025-07-31").ToString("yyyy-MM-dd");
             if (!DailyMiningStats.ContainsKey(today))
             {
                 DailyMiningStats[today] = 0;
@@ -1393,7 +1393,7 @@ namespace MineRefine.Models
         // Current Game Info
         public const string CURRENT_VERSION = "1.0.0-alpha";
         public const string CURRENT_USER = "Valinor-70";
-        public const string CURRENT_DATETIME = "2025-06-07 09:20:35";
+        public const string CURRENT_DATETIME = "2025-07-31 13:29:22";
 
         // Game Balance Constants
         public const int BASE_STAMINA = 100;

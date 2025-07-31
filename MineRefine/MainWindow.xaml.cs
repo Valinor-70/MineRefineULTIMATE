@@ -1585,8 +1585,6 @@ namespace MineRefine
             return null;
         }
 
-        private DispatcherTimer? _loadingTimer;
-
         private void ShowLoading(string message = "Loading...")
         {
             try
