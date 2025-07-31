@@ -321,26 +321,142 @@ namespace MineRefine
         {
             try
             {
+                // Phase 2: Enhanced particle types based on current mining state
+                var particleType = GetParticleTypeBasedOnState();
+                
                 var particle = new Border
                 {
                     Width = _random.Next(3, 8),
                     Height = _random.Next(3, 8),
                     CornerRadius = new CornerRadius(_random.Next(1, 4)),
-                    Background = GetParticleColor(),
+                    Background = GetEnhancedParticleColor(particleType),
                     Opacity = 0.7
                 };
 
-                Canvas.SetLeft(particle, _random.Next(0, (int)ParticleCanvas.ActualWidth));
-                Canvas.SetTop(particle, -10);
+                // Phase 2: Add weather effects to particle movement
+                var weatherEffect = _weatherService?.GetCurrentWeatherEffect();
+                var startX = _random.Next(0, (int)ParticleCanvas.ActualWidth);
+                var startY = -10;
+                
+                // Apply weather-based starting position adjustments
+                if (weatherEffect != null)
+                {
+                    switch (_weatherService.GetCurrentWeather())
+                    {
+                        case WeatherCondition.Windy:
+                            startX += _random.Next(-20, 20);
+                            break;
+                        case WeatherCondition.Stormy:
+                            startX += _random.Next(-30, 30);
+                            startY += _random.Next(-5, 5);
+                            break;
+                        case WeatherCondition.QuantumFlux:
+                            // Quantum particles appear from random dimensions
+                            startX = _random.Next(-50, (int)ParticleCanvas.ActualWidth + 50);
+                            startY = _random.Next(-20, 20);
+                            break;
+                    }
+                }
+
+                Canvas.SetLeft(particle, startX);
+                Canvas.SetTop(particle, startY);
 
                 ParticleCanvas.Children.Add(particle);
                 _particles.Add(particle);
 
-                // WinUI 3 Compatible Fade In Animation
+                // Phase 2: Enhanced animation based on particle type
+                CreateEnhancedParticleAnimation(particle, particleType);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CreateMiningParticle error: {ex.Message}");
+            }
+        }
+
+        private enum ParticleType
+        {
+            Normal,
+            Rare,
+            Quantum,
+            Weather,
+            Skill
+        }
+
+        private ParticleType GetParticleTypeBasedOnState()
+        {
+            // Determine particle type based on current game state
+            var weather = _weatherService?.GetCurrentWeather() ?? WeatherCondition.Clear;
+            
+            if (weather == WeatherCondition.QuantumFlux || weather == WeatherCondition.TemporalStorm || 
+                weather == WeatherCondition.RealityDistortion || weather == WeatherCondition.DimensionalRift)
+            {
+                return ParticleType.Quantum;
+            }
+            
+            if (weather != WeatherCondition.Clear)
+            {
+                return ParticleType.Weather;
+            }
+            
+            // Check if player has high-level skills for skill particles
+            if (_skillsService?.GetTotalSkillLevels(_currentPlayer) > 20)
+            {
+                return _random.Next(0, 10) == 0 ? ParticleType.Skill : ParticleType.Normal;
+            }
+            
+            // Rare particles for high-risk mining
+            if (_currentRiskMultiplier > 2.0)
+            {
+                return _random.Next(0, 5) == 0 ? ParticleType.Rare : ParticleType.Normal;
+            }
+            
+            return ParticleType.Normal;
+        }
+
+        private SolidColorBrush GetEnhancedParticleColor(ParticleType particleType)
+        {
+            return particleType switch
+            {
+                ParticleType.Quantum => new SolidColorBrush(Color.FromArgb(255, 
+                    (byte)_random.Next(150, 255), 
+                    (byte)_random.Next(0, 100), 
+                    (byte)_random.Next(200, 255))), // Purple/Blue quantum colors
+                ParticleType.Rare => new SolidColorBrush(Color.FromArgb(255, 
+                    (byte)_random.Next(200, 255), 
+                    (byte)_random.Next(150, 255), 
+                    (byte)_random.Next(0, 100))), // Gold/Yellow rare colors
+                ParticleType.Weather => GetWeatherParticleColor(),
+                ParticleType.Skill => new SolidColorBrush(Color.FromArgb(255, 
+                    (byte)_random.Next(0, 255), 
+                    (byte)_random.Next(200, 255), 
+                    (byte)_random.Next(0, 255))), // Green skill colors
+                _ => GetParticleColor() // Normal particle colors
+            };
+        }
+
+        private SolidColorBrush GetWeatherParticleColor()
+        {
+            var weather = _weatherService?.GetCurrentWeather() ?? WeatherCondition.Clear;
+            return weather switch
+            {
+                WeatherCondition.Rainy => new SolidColorBrush(Colors.LightBlue),
+                WeatherCondition.Stormy => new SolidColorBrush(Colors.DarkGray),
+                WeatherCondition.Snowy => new SolidColorBrush(Colors.White),
+                WeatherCondition.Foggy => new SolidColorBrush(Colors.LightGray),
+                WeatherCondition.CosmicRadiation => new SolidColorBrush(Colors.Orange),
+                _ => GetParticleColor()
+            };
+        }
+
+        private void CreateEnhancedParticleAnimation(Border particle, ParticleType particleType)
+        {
+            try
+            {
+                // Base fade in animation
                 var fadeIn = new DoubleAnimation
                 {
                     From = 0.0,
-                    To = 0.7,
+                    To = particleType == ParticleType.Quantum ? 1.0 : 0.7,
                     Duration = TimeSpan.FromMilliseconds(300 / _gameSettings.AnimationSpeed)
                 };
 
@@ -348,6 +464,256 @@ namespace MineRefine
                 storyboard.Children.Add(fadeIn);
                 Storyboard.SetTarget(fadeIn, particle);
                 Storyboard.SetTargetProperty(fadeIn, "Opacity");
+
+                // Phase 2: Add special effects for different particle types
+                switch (particleType)
+                {
+                    case ParticleType.Quantum:
+                        // Quantum particles have pulsing effect
+                        var pulse = new DoubleAnimation
+                        {
+                            From = 0.5,
+                            To = 1.0,
+                            Duration = TimeSpan.FromMilliseconds(500),
+                            AutoReverse = true,
+                            RepeatBehavior = RepeatBehavior.Forever
+                        };
+                        storyboard.Children.Add(pulse);
+                        Storyboard.SetTarget(pulse, particle);
+                        Storyboard.SetTargetProperty(pulse, "Opacity");
+                        break;
+
+                    case ParticleType.Rare:
+                        // Rare particles sparkle
+                        var sparkle = new DoubleAnimation
+                        {
+                            From = 0.7,
+                            To = 1.0,
+                            Duration = TimeSpan.FromMilliseconds(200),
+                            AutoReverse = true,
+                            RepeatBehavior = new RepeatBehavior(3)
+                        };
+                        storyboard.Children.Add(sparkle);
+                        Storyboard.SetTarget(sparkle, particle);
+                        Storyboard.SetTargetProperty(sparkle, "Opacity");
+                        break;
+
+                    case ParticleType.Skill:
+                        // Skill particles glow steadily
+                        var glow = new DoubleAnimation
+                        {
+                            From = 0.6,
+                            To = 0.9,
+                            Duration = TimeSpan.FromMilliseconds(800),
+                            AutoReverse = true,
+                            RepeatBehavior = RepeatBehavior.Forever
+                        };
+                        storyboard.Children.Add(glow);
+                        Storyboard.SetTarget(glow, particle);
+                        Storyboard.SetTargetProperty(glow, "Opacity");
+                        break;
+                }
+
+                storyboard.Begin();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CreateEnhancedParticleAnimation error: {ex.Message}");
+            }
+        }
+
+        private void CreateSpecialMiningEffect(string effectType)
+        {
+            try
+            {
+                if (ParticleCanvas == null) return;
+
+                switch (effectType)
+                {
+                    case "CriticalHit":
+                        CreateCriticalHitEffect();
+                        break;
+                    case "RareFind":
+                        CreateRareFindEffect();
+                        break;
+                    case "QuantumDiscovery":
+                        CreateQuantumDiscoveryEffect();
+                        break;
+                    case "WeatherBonus":
+                        CreateWeatherBonusEffect();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CreateSpecialMiningEffect error: {ex.Message}");
+            }
+        }
+
+        private void CreateCriticalHitEffect()
+        {
+            // Create burst of gold particles
+            for (int i = 0; i < 8; i++)
+            {
+                var particle = new Border
+                {
+                    Width = 6,
+                    Height = 6,
+                    CornerRadius = new CornerRadius(3),
+                    Background = new SolidColorBrush(Colors.Gold),
+                    Opacity = 1.0
+                };
+
+                var centerX = ParticleCanvas.ActualWidth / 2;
+                var centerY = ParticleCanvas.ActualHeight / 2;
+                var angle = (i * 45) * Math.PI / 180;
+                var distance = 50;
+
+                Canvas.SetLeft(particle, centerX + Math.Cos(angle) * distance);
+                Canvas.SetTop(particle, centerY + Math.Sin(angle) * distance);
+
+                ParticleCanvas.Children.Add(particle);
+
+                // Animate burst outward
+                var burstAnimation = new Storyboard();
+                var fadeOut = new DoubleAnimation { From = 1.0, To = 0.0, Duration = TimeSpan.FromMilliseconds(800) };
+                Storyboard.SetTarget(fadeOut, particle);
+                Storyboard.SetTargetProperty(fadeOut, "Opacity");
+                burstAnimation.Children.Add(fadeOut);
+
+                burstAnimation.Completed += (s, e) => ParticleCanvas.Children.Remove(particle);
+                burstAnimation.Begin();
+            }
+        }
+
+        private void CreateRareFindEffect()
+        {
+            // Create sparkling effect
+            for (int i = 0; i < 12; i++)
+            {
+                var particle = new Border
+                {
+                    Width = 4,
+                    Height = 4,
+                    CornerRadius = new CornerRadius(2),
+                    Background = new SolidColorBrush(Colors.Diamond),
+                    Opacity = 1.0
+                };
+
+                Canvas.SetLeft(particle, _random.Next(0, (int)ParticleCanvas.ActualWidth));
+                Canvas.SetTop(particle, _random.Next(0, (int)ParticleCanvas.ActualHeight));
+
+                ParticleCanvas.Children.Add(particle);
+
+                // Sparkle animation
+                var sparkleAnimation = new Storyboard();
+                var twinkle = new DoubleAnimation 
+                { 
+                    From = 1.0, 
+                    To = 0.0, 
+                    Duration = TimeSpan.FromMilliseconds(600),
+                    AutoReverse = true,
+                    RepeatBehavior = new RepeatBehavior(2)
+                };
+                Storyboard.SetTarget(twinkle, particle);
+                Storyboard.SetTargetProperty(twinkle, "Opacity");
+                sparkleAnimation.Children.Add(twinkle);
+
+                sparkleAnimation.Completed += (s, e) => ParticleCanvas.Children.Remove(particle);
+                sparkleAnimation.Begin();
+            }
+        }
+
+        private void CreateQuantumDiscoveryEffect()
+        {
+            // Create quantum reality distortion effect
+            for (int i = 0; i < 15; i++)
+            {
+                var particle = new Border
+                {
+                    Width = _random.Next(2, 10),
+                    Height = _random.Next(2, 10),
+                    CornerRadius = new CornerRadius(_random.Next(1, 5)),
+                    Background = new SolidColorBrush(Color.FromArgb(255, 
+                        (byte)_random.Next(100, 255), 
+                        (byte)_random.Next(0, 150), 
+                        (byte)_random.Next(200, 255))),
+                    Opacity = 0.8
+                };
+
+                Canvas.SetLeft(particle, _random.Next(-50, (int)ParticleCanvas.ActualWidth + 50));
+                Canvas.SetTop(particle, _random.Next(-50, (int)ParticleCanvas.ActualHeight + 50));
+
+                ParticleCanvas.Children.Add(particle);
+
+                // Quantum phase animation
+                var quantumAnimation = new Storyboard();
+                var phase = new DoubleAnimation 
+                { 
+                    From = 0.8, 
+                    To = 0.0, 
+                    Duration = TimeSpan.FromMilliseconds(1200),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                };
+                Storyboard.SetTarget(phase, particle);
+                Storyboard.SetTargetProperty(phase, "Opacity");
+                quantumAnimation.Children.Add(phase);
+
+                quantumAnimation.Completed += (s, e) => ParticleCanvas.Children.Remove(particle);
+                quantumAnimation.Begin();
+            }
+        }
+
+        private void CreateWeatherBonusEffect()
+        {
+            var weather = _weatherService?.GetCurrentWeather() ?? WeatherCondition.Clear;
+            var effectColor = weather switch
+            {
+                WeatherCondition.Stormy => Colors.Purple,
+                WeatherCondition.Snowy => Colors.LightCyan,
+                WeatherCondition.Rainy => Colors.Blue,
+                WeatherCondition.QuantumFlux => Colors.Magenta,
+                _ => Colors.White
+            };
+
+            // Create weather-themed effect
+            for (int i = 0; i < 10; i++)
+            {
+                var particle = new Border
+                {
+                    Width = 5,
+                    Height = 5,
+                    CornerRadius = new CornerRadius(2.5),
+                    Background = new SolidColorBrush(effectColor),
+                    Opacity = 0.9
+                };
+
+                Canvas.SetLeft(particle, _random.Next(0, (int)ParticleCanvas.ActualWidth));
+                Canvas.SetTop(particle, -20);
+
+                ParticleCanvas.Children.Add(particle);
+
+                // Weather fall animation
+                var fallAnimation = new Storyboard();
+                var fall = new DoubleAnimation 
+                { 
+                    From = -20, 
+                    To = ParticleCanvas.ActualHeight + 20, 
+                    Duration = TimeSpan.FromMilliseconds(2000)
+                };
+                Storyboard.SetTarget(fall, particle);
+                Storyboard.SetTargetProperty(fall, "(Canvas.Top)");
+                fallAnimation.Children.Add(fall);
+
+                var fade = new DoubleAnimation { From = 0.9, To = 0.0, Duration = TimeSpan.FromMilliseconds(2000) };
+                Storyboard.SetTarget(fade, particle);
+                Storyboard.SetTargetProperty(fade, "Opacity");
+                fallAnimation.Children.Add(fade);
+
+                fallAnimation.Completed += (s, e) => ParticleCanvas.Children.Remove(particle);
+                fallAnimation.Begin();
+            }
+        }
                 storyboard.Begin();
             }
             catch (Exception ex)
@@ -526,12 +892,34 @@ namespace MineRefine
                     if (IsQuantumMaterial(result.Mineral.Name))
                     {
                         _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "quantum_material_found", result.Mineral.Name);
+                        // Phase 2: Special effect for quantum discoveries
+                        CreateSpecialMiningEffect("QuantumDiscovery");
                     }
                     
                     // Check for high-risk mining achievement
                     if (_currentRiskMultiplier >= 2.5)
                     {
                         _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_completed", _currentRiskMultiplier);
+                        // Phase 2: Special effect for high-risk mining
+                        CreateSpecialMiningEffect("CriticalHit");
+                    }
+
+                    // Phase 2: Additional particle effects based on mining results
+                    var isRareMineral = IsRareMineral(result.Mineral.Name);
+                    var isWeatherBonus = _weatherService?.GetCurrentWeatherEffect()?.MiningEfficiency > 1.0;
+                    var isSkillCritical = _skillsService?.GetSkillBonus(_currentPlayer, "critical_chance") > 0 && _random.NextDouble() < 0.1;
+
+                    if (isRareMineral)
+                    {
+                        CreateSpecialMiningEffect("RareFind");
+                    }
+                    else if (isWeatherBonus == true)
+                    {
+                        CreateSpecialMiningEffect("WeatherBonus");
+                    }
+                    else if (isSkillCritical)
+                    {
+                        CreateSpecialMiningEffect("CriticalHit");
                     }
                 }
                 else
@@ -2400,6 +2788,12 @@ namespace MineRefine
         {
             var quantumMinerals = new[] { "Void Crystal", "Temporal Gem", "Antimatter Fragment", "Reality Shard", "Quantum Dust", "Dimensional Ore" };
             return quantumMinerals.Contains(mineralName);
+        }
+
+        private bool IsRareMineral(string mineralName)
+        {
+            var rareMinerals = new[] { "Gold", "Ruby", "Diamond", "Emerald", "Sapphire", "Platinum", "Void Crystal", "Temporal Gem" };
+            return rareMinerals.Contains(mineralName);
         }
 
         private void ApplyPhase2Bonuses(ref double efficiency, ref double safety, ref double staminaCost, ref double quantumBonus, ref double rareBonus)
