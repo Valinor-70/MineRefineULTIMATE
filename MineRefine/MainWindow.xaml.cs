@@ -106,7 +106,7 @@ namespace MineRefine
                 {
                     try
                     {
-                        await _dataService.SavePlayerAsync(_currentPlayer);
+                        await _dataService.SavePlayersAsync(new List<Player> { _currentPlayer });
                     }
                     catch (Exception ex)
                     {
@@ -120,53 +120,7 @@ namespace MineRefine
             }
         }
 
-        // Improved: Add keyboard navigation support for better accessibility
-        private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-        {
-            try
-            {
-                args.Handled = true;
-                
-                switch (sender.Key)
-                {
-                    case Windows.System.VirtualKey.Number1:
-                        SwitchToTab("Mine");
-                        break;
-                    case Windows.System.VirtualKey.Number2:
-                        SwitchToTab("Locations");
-                        break;
-                    case Windows.System.VirtualKey.Number3:
-                        SwitchToTab("Skills");
-                        break;
-                    case Windows.System.VirtualKey.Number4:
-                        SwitchToTab("Achievements");
-                        break;
-                    case Windows.System.VirtualKey.Number5:
-                        SwitchToTab("Market");
-                        break;
-                    case Windows.System.VirtualKey.Number6:
-                        SwitchToTab("Menu");
-                        break;
-                    case Windows.System.VirtualKey.M when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
-                        MineButton_Click(MineButton, null);
-                        break;
-                    case Windows.System.VirtualKey.Space:
-                        MineButton_Click(MineButton, null);
-                        break;
-                    case Windows.System.VirtualKey.R when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
-                        RestButton_Click(RestButton, null);
-                        break;
-                    default:
-                        args.Handled = false;
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"KeyboardAccelerator_Invoked error: {ex.Message}");
-                args.Handled = false;
-            }
-        }
+
 
         #region Initialization
 
@@ -712,13 +666,6 @@ namespace MineRefine
 
                 fallAnimation.Completed += (s, e) => ParticleCanvas.Children.Remove(particle);
                 fallAnimation.Begin();
-            }
-        }
-                storyboard.Begin();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"CreateMiningParticle error: {ex.Message}");
             }
         }
 
@@ -2299,20 +2246,20 @@ namespace MineRefine
                 {
                     if (_skillsService.UnlockSkill(_currentPlayer, skillId))
                     {
-                        ShowNotification("Skill Unlocked!", $"You've unlocked a new skill!", NotificationType.Success);
+                        ShowNotification("Skill Unlocked!", "You've unlocked a new skill!");
                         _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "skill_purchased", skillId);
                         UpdateSkillsUI();
-                        UpdatePlayerUI();
+                        UpdatePlayerDisplay();
                     }
                 }
                 else if (canUpgrade)
                 {
                     if (_skillsService.UpgradeSkill(_currentPlayer, skillId))
                     {
-                        ShowNotification("Skill Upgraded!", $"Skill has been upgraded!", NotificationType.Success);
+                        ShowNotification("Skill Upgraded!", "Skill has been upgraded!");
                         _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "skill_upgraded", skillId);
                         UpdateSkillsUI();
-                        UpdatePlayerUI();
+                        UpdatePlayerDisplay();
                     }
                 }
             }
@@ -2405,12 +2352,12 @@ namespace MineRefine
         private void ResetSkillsButton_Click(object sender, RoutedEventArgs e)
         {
             // For now, just show a message - could implement skill reset functionality
-            ShowNotification("Reset Skills", "Skill reset functionality coming soon!", NotificationType.Info);
+            ShowNotification("Reset Skills", "Skill reset functionality coming soon!");
         }
 
         private void SkillsHelpButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowNotification("Skills Help", "Skills improve your mining efficiency and unlock new abilities. Earn skill points by leveling up!", NotificationType.Info);
+            ShowNotification("Skills Help", "Skills improve your mining efficiency and unlock new abilities. Earn skill points by leveling up!");
         }
 
         #endregion
@@ -2704,14 +2651,14 @@ namespace MineRefine
 
         private void AchievementsHelpButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowNotification("Achievements Help", "Complete achievements to earn points and unlock rewards. Some achievements are hidden until discovered!", NotificationType.Info);
+            ShowNotification("Achievements Help", "Complete achievements to earn points and unlock rewards. Some achievements are hidden until discovered!");
         }
 
         private void OnAchievementUnlocked(object sender, Achievement achievement)
         {
             DispatcherQueue.TryEnqueue(() =>
             {
-                ShowNotification("🏆 Achievement Unlocked!", $"{achievement.Name}: {achievement.Description}", NotificationType.Achievement);
+                ShowNotification("🏆 Achievement Unlocked!", $"{achievement.Name}: {achievement.Description}");
                 UpdateAchievementsUI();
             });
         }
@@ -2772,7 +2719,7 @@ namespace MineRefine
             DispatcherQueue.TryEnqueue(() =>
             {
                 var effect = _weatherService.GetCurrentWeatherEffect();
-                ShowNotification("🌤️ Weather Changed", $"Weather is now {effect.Name}: {effect.Description}", NotificationType.Info);
+                ShowNotification("🌤️ Weather Changed", $"Weather is now {effect.Name}: {effect.Description}");
                 UpdateWeatherDisplay();
                 
                 // Track weather encounter for achievements

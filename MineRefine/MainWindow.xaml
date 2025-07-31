@@ -1,25 +1,11 @@
 <Window x:Class="MineRefine.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Mine &amp; Refine Ultimate Edition"
-        IsTabStop="False">
+        Title="Mine &amp; Refine Ultimate Edition">
 
     <Window.SystemBackdrop>
         <MicaBackdrop Kind="Base"/>
     </Window.SystemBackdrop>
-
-    <!-- Improved: Add keyboard accelerators for better accessibility -->
-    <Window.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Number1" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number2" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number3" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number4" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number5" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Number6" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="M" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="Space" Invoked="KeyboardAccelerator_Invoked" />
-        <KeyboardAccelerator Key="R" Modifiers="Control" Invoked="KeyboardAccelerator_Invoked" />
-    </Window.KeyboardAccelerators>
 
     <Grid Background="#FF1E1E1E">
         <Grid.Resources>
