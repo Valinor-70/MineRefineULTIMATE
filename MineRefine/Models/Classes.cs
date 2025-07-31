@@ -872,6 +872,7 @@ namespace MineRefine.Models
         public string Difficulty { get; set; } = "Normal";
         public bool IsCompleted { get; set; } = false;
         public bool IsSecret { get; set; } = false;
+        public bool IsHidden { get; set; } = false;
         public DateTime? CompletedDate { get; set; }
         public string? CompletedBy { get; set; }
         public DateTime? UnlockedDate { get; set; }
