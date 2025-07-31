@@ -486,7 +486,23 @@ namespace MineRefine.Services
                 TotalEarnings = 0,
                 UnlockedLocations = new List<string> { "surface_mine" },
                 MineralStats = new Dictionary<string, long>(),
-                LocationFirstVisit = new Dictionary<string, DateTime>()
+                LocationFirstVisit = new Dictionary<string, DateTime>(),
+                // Ensure Phase 2 collections are initialized
+                UnlockedSkills = new List<string>(),
+                CompletedAchievements = new List<string>(),
+                CompletedTutorials = new List<string>(),
+                UnlockedNarratives = new List<string>(),
+                MiningHistory = new List<MiningSession>(),
+                SessionHistory = new List<GameSession>(),
+                WeatherEncounters = new Dictionary<string, int>(),
+                LocationSuccessRates = new Dictionary<string, double>(),
+                SkillLevels = new Dictionary<string, int>(),
+                AchievementProgress = new List<string>(),
+                DailyMiningStats = new Dictionary<string, int>(),
+                Equipment = new List<Equipment>(),
+                // Set default weather
+                CurrentWeather = WeatherCondition.Clear,
+                LastWeatherChange = DateTime.Parse(CURRENT_DATETIME)
             };
 
             // Initialize starting location visit
@@ -501,6 +517,20 @@ namespace MineRefine.Services
             player.UnlockedLocations ??= new List<string> { "surface_mine" };
             player.MineralStats ??= new Dictionary<string, long>();
             player.LocationFirstVisit ??= new Dictionary<string, DateTime>();
+            
+            // Ensure Phase 2 collections are not null
+            player.UnlockedSkills ??= new List<string>();
+            player.CompletedAchievements ??= new List<string>();
+            player.CompletedTutorials ??= new List<string>();
+            player.UnlockedNarratives ??= new List<string>();
+            player.MiningHistory ??= new List<MiningSession>();
+            player.SessionHistory ??= new List<GameSession>();
+            player.WeatherEncounters ??= new Dictionary<string, int>();
+            player.LocationSuccessRates ??= new Dictionary<string, double>();
+            player.SkillLevels ??= new Dictionary<string, int>();
+            player.AchievementProgress ??= new List<string>();
+            player.DailyMiningStats ??= new Dictionary<string, int>();
+            player.Equipment ??= new List<Equipment>();
 
             // Ensure minimum values
             if (player.Stamina < 0) player.Stamina = 0;

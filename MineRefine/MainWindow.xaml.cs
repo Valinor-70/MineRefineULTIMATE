@@ -128,46 +128,74 @@ namespace MineRefine
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Starting initialization");
                 this.DispatcherQueue.TryEnqueue(() => ShowLoading("Initializing quantum mining systems..."));
 
                 // Load game data
+                System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Loading game data");
                 _locations = _dataService.GetMiningLocations();
+                System.Diagnostics.Debug.WriteLine($"InitializeGameAsync: Loaded {_locations.Count} locations");
+                
                 _currentLocation = _locations.FirstOrDefault(l => l.Id == _currentPlayer.CurrentLocationId) ?? _locations.First();
+                System.Diagnostics.Debug.WriteLine($"InitializeGameAsync: Current location set to {_currentLocation.Name}");
 
                 // Initialize UI on UI thread
                 this.DispatcherQueue.TryEnqueue(() =>
                 {
                     try
                     {
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Starting UI initialization");
+                        
                         UpdatePlayerDisplay();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Updated player display");
+                        
                         PopulateLocationComboBox();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Populated location combo box");
+                        
                         UpdateLocationDescription();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Updated location description");
+                        
                         InitializeGameLog();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Initialized game log");
+                        
                         InitializeParticleSystem();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Initialized particle system");
                         
                         // Initialize Phase 2 systems
                         InitializePhase2Systems();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Initialized Phase 2 systems");
                         
                         ShowWelcomeTab();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Showed welcome tab");
+                        
                         HideLoading();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Hidden loading overlay");
 
                         _isInitialized = true;
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Set initialization flag");
 
                         ShowNotification("🚀 Systems Online", $"Welcome back, {_currentPlayer.Name}! Ready for mining operations.");
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Showed welcome notification");
 
                         // Start background systems
                         StartBackgroundSystems();
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Started background systems");
+                        
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: UI initialization completed successfully");
                     }
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"UI initialization error: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"UI initialization stack trace: {ex.StackTrace}");
                         HideLoading();
+                        ShowNotification("⚠️ UI Error", $"UI initialization failed: {ex.Message}");
                     }
                 });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"InitializeGameAsync error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"InitializeGameAsync stack trace: {ex.StackTrace}");
                 this.DispatcherQueue.TryEnqueue(() =>
                 {
                     HideLoading();
@@ -2771,29 +2799,46 @@ namespace MineRefine
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Starting Phase 2 initialization");
+                
                 // Initialize skills for player
                 _skillsService.InitializePlayerSkills(_currentPlayer);
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Skills initialized");
                 
                 // Initialize achievements for player
                 _achievementsService.InitializePlayerAchievements(_currentPlayer);
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Achievements initialized");
                 
                 // Initialize weather system
                 InitializeWeatherSystem();
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Weather system initialized");
                 
                 // Update UI
                 UpdateSkillsUI();
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Skills UI updated");
+                
                 UpdateAchievementsUI();
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Achievements UI updated");
                 
                 // Set default categories
                 UpdateSkillCategoryButtons();
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Skill category buttons updated");
+                
                 LoadSkillsForCategory(_currentSkillCategory);
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Skills loaded for category");
                 
                 UpdateAchievementCategoryButtons();
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Achievement category buttons updated");
+                
                 LoadAchievementsForCategory(_currentAchievementCategory);
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Achievements loaded for category");
+                
+                System.Diagnostics.Debug.WriteLine("InitializePhase2Systems: Phase 2 initialization completed successfully");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"InitializePhase2Systems error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"InitializePhase2Systems stack trace: {ex.StackTrace}");
             }
         }
 
