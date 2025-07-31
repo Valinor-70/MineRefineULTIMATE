@@ -174,8 +174,18 @@ namespace MineRefine
                         _isInitialized = true;
                         System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Set initialization flag");
 
-                        ShowNotification("🚀 Systems Online", $"Welcome back, {_currentPlayer.Name}! Ready for mining operations.");
+                        ShowNotification("🚀 Systems Online", $"Welcome back, {_currentPlayer.Name}! All systems initialized. Click the Mine button to start your mining adventure.");
                         System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Showed welcome notification");
+
+                        // Add helpful log entries for the user
+                        AddLogEntry($"🎮 Welcome to Mine & Refine Ultimate, {_currentPlayer.Name}!");
+                        AddLogEntry($"💰 Starting funds: £{_currentPlayer.TotalMoney:N0}");
+                        AddLogEntry($"⚡ Stamina: {_currentPlayer.Stamina}/{_currentPlayer.MaxStamina}");
+                        AddLogEntry($"📍 Current location: {_currentLocation.Name}");
+                        AddLogEntry($"🔥 Difficulty: {_currentPlayer.Difficulty}");
+                        AddLogEntry("⛏️ Click the MINE button to start your mining operation!");
+                        
+                        System.Diagnostics.Debug.WriteLine("InitializeGameAsync: Added welcome log entries");
 
                         // Start background systems
                         StartBackgroundSystems();
@@ -801,15 +811,20 @@ namespace MineRefine
             {
                 if (!_isInitialized || _currentPlayer == null || _currentLocation == null || _gameService == null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"MineButton_Click: System not ready - _isInitialized: {_isInitialized}, _currentPlayer: {_currentPlayer != null}, _currentLocation: {_currentLocation != null}, _gameService: {_gameService != null}");
                     AddLogEntry("❌ System not ready for mining operations");
+                    ShowNotification("⚠️ System Error", "Game systems are not fully initialized. Please wait or restart the game.");
                     return;
                 }
 
                 if (_currentPlayer.Stamina < 10)
                 {
                     AddLogEntry("😴 Insufficient energy for mining. Please rest first.");
+                    ShowNotification("⚠️ Low Energy", "You need at least 10 stamina to mine. Rest or use stamina potions.");
                     return;
                 }
+
+                System.Diagnostics.Debug.WriteLine($"MineButton_Click: Starting mining operation for {_currentPlayer.Name} at {_currentLocation.Name}");
 
                 // Show mining animation
                 await PerformMiningAnimation();
@@ -819,6 +834,8 @@ namespace MineRefine
                 var result = await _gameService.PerformMiningOperationAsync(_currentPlayer, _currentLocation, _currentRiskMultiplier);
 
                 HideLoading();
+
+                System.Diagnostics.Debug.WriteLine($"MineButton_Click: Mining operation completed with success: {result.IsSuccess}");
 
                 // Record in mining history
                 var session = new MiningSession
