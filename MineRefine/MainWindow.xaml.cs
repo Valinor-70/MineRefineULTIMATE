@@ -550,7 +550,7 @@ namespace MineRefine
                     Width = 4,
                     Height = 4,
                     CornerRadius = new CornerRadius(2),
-                    Background = new SolidColorBrush(Colors.Diamond),
+                    Background = new SolidColorBrush(Colors.LightBlue),
                     Opacity = 1.0
                 };
 
@@ -1630,7 +1630,7 @@ namespace MineRefine
             }
         }
 
-        private string GetWeatherEffectDescription(WeatherCondition weather)
+        private static string GetWeatherEffectDescription(WeatherCondition weather)
         {
             return weather switch
             {
@@ -1880,11 +1880,7 @@ namespace MineRefine
             }
         }
 
-        // Legacy tab button handlers (for compatibility)
-        private void LocationsTabButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (MainTabView != null) MainTabView.SelectedItem = LocationsTabItem;
-        }
+        // Legacy tab button handlers removed - using TabView now
 
         // Simplified navigation - no longer needed with TabView
         private void SwitchToTab(string tabName)
@@ -2161,8 +2157,10 @@ namespace MineRefine
 
             var card = new Border
             {
-                Style = this.Resources["CardStyle"] as Style,
                 Margin = new Thickness(5),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Colors.Gray),
                 Background = new SolidColorBrush(isUnlocked ? Colors.DarkGreen : (canUnlock ? Colors.DarkOrange : Colors.DarkGray))
             };
 
@@ -2438,8 +2436,10 @@ namespace MineRefine
         {
             var card = new Border
             {
-                Style = this.Resources["CardStyle"] as Style,
                 Margin = new Thickness(5),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush(Colors.Gray),
                 Background = new SolidColorBrush(achievement.IsCompleted ? Colors.DarkGreen : Colors.DarkSlateGray)
             };
 
@@ -2654,7 +2654,7 @@ namespace MineRefine
             ShowNotification("Achievements Help", "Complete achievements to earn points and unlock rewards. Some achievements are hidden until discovered!");
         }
 
-        private void OnAchievementUnlocked(object sender, Achievement achievement)
+        private void OnAchievementUnlocked(object? sender, Achievement achievement)
         {
             DispatcherQueue.TryEnqueue(() =>
             {
@@ -2714,7 +2714,7 @@ namespace MineRefine
             }
         }
 
-        private void OnWeatherChanged(object sender, WeatherCondition newWeather)
+        private void OnWeatherChanged(object? sender, WeatherCondition newWeather)
         {
             DispatcherQueue.TryEnqueue(() =>
             {

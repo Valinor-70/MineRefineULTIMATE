@@ -1720,53 +1720,6 @@ namespace MineRefine.Models
 
     #region Achievements System (Phase 2)
 
-    public class Achievement : INotifyPropertyChanged
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public AchievementType Type { get; set; }
-        public string Icon { get; set; } = "🏆";
-        public int RequiredValue { get; set; } = 0;
-        public int CurrentProgress { get; set; } = 0;
-        public bool IsCompleted { get; set; } = false;
-        public DateTime? CompletedDate { get; set; }
-        public string RewardDescription { get; set; } = string.Empty;
-        public Dictionary<string, object> RewardData { get; set; } = new();
-        public bool IsHidden { get; set; } = false;
-        public string Category { get; set; } = "General";
-        public int PointValue { get; set; } = 10;
-
-        public double ProgressPercentage => RequiredValue > 0 ? Math.Min(100.0, (double)CurrentProgress / RequiredValue * 100.0) : 0.0;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void UpdateProgress(int newProgress)
-        {
-            var oldProgress = CurrentProgress;
-            CurrentProgress = Math.Max(CurrentProgress, newProgress);
-            
-            if (!IsCompleted && CurrentProgress >= RequiredValue)
-            {
-                IsCompleted = true;
-                CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
-                OnPropertyChanged(nameof(IsCompleted));
-                OnPropertyChanged(nameof(CompletedDate));
-            }
-
-            if (oldProgress != CurrentProgress)
-            {
-                OnPropertyChanged(nameof(CurrentProgress));
-                OnPropertyChanged(nameof(ProgressPercentage));
-            }
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
     public class AchievementSystem
     {
         public List<Achievement> Achievements { get; set; } = new();
