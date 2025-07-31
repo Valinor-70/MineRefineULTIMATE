@@ -36,6 +36,7 @@ namespace MineRefine
         private readonly Random _random = new();
         private DispatcherTimer? _autoMiningTimer;
         private DispatcherTimer? _particleTimer;
+        private DispatcherTimer? _loadingTimer;
         private List<FrameworkElement> _particles = new();
 
         // Constants - Updated to current timestamp
@@ -53,8 +54,97 @@ namespace MineRefine
 
             this.Title = "Mine & Refine Ultimate Edition - Alpha v1.0.0";
 
+            // Improved: Add proper cleanup event handlers
+            this.Closed += MainWindow_Closed;
+
             // Initialize game immediately since we have player data
             _ = Task.Run(InitializeGameAsync);
+        }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs e)
+        {
+            try
+            {
+                // Cleanup resources to prevent memory leaks
+                StopAutoMining();
+                
+                // Stop all timers
+                _particleTimer?.Stop();
+                _autoMiningTimer?.Stop();
+                _loadingTimer?.Stop();
+                
+                // Clear particle system
+                if (ParticleCanvas != null)
+                {
+                    ParticleCanvas.Children.Clear();
+                    _particles.Clear();
+                }
+
+                // Save current state
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _dataService.SavePlayerAsync(_currentPlayer);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainWindow_Closed save error: {ex.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainWindow_Closed error: {ex.Message}");
+            }
+        }
+
+        // Improved: Add keyboard navigation support for better accessibility
+        private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            try
+            {
+                args.Handled = true;
+                
+                switch (sender.Key)
+                {
+                    case Windows.System.VirtualKey.Number1:
+                        SwitchToTab("Mine");
+                        break;
+                    case Windows.System.VirtualKey.Number2:
+                        SwitchToTab("Locations");
+                        break;
+                    case Windows.System.VirtualKey.Number3:
+                        SwitchToTab("Skills");
+                        break;
+                    case Windows.System.VirtualKey.Number4:
+                        SwitchToTab("Achievements");
+                        break;
+                    case Windows.System.VirtualKey.Number5:
+                        SwitchToTab("Market");
+                        break;
+                    case Windows.System.VirtualKey.Number6:
+                        SwitchToTab("Menu");
+                        break;
+                    case Windows.System.VirtualKey.M when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
+                        MineButton_Click(MineButton, null);
+                        break;
+                    case Windows.System.VirtualKey.Space:
+                        MineButton_Click(MineButton, null);
+                        break;
+                    case Windows.System.VirtualKey.R when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
+                        RestButton_Click(RestButton, null);
+                        break;
+                    default:
+                        args.Handled = false;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"KeyboardAccelerator_Invoked error: {ex.Message}");
+                args.Handled = false;
+            }
         }
 
         #region Initialization
@@ -131,11 +221,12 @@ namespace MineRefine
 
         private void InitializeParticleSystem()
         {
-            if (!_gameSettings.AnimationSpeed.Equals(0.0))
+            if (!_gameSettings.AnimationSpeed.Equals(0.0) && !_gameSettings.ReducedAnimations)
             {
                 _particleTimer = new DispatcherTimer
                 {
-                    Interval = TimeSpan.FromMilliseconds(100 / _gameSettings.AnimationSpeed)
+                    // Improved: Reduced frequency for better performance
+                    Interval = TimeSpan.FromMilliseconds(Math.Max(200, 300 / _gameSettings.AnimationSpeed))
                 };
                 _particleTimer.Tick += UpdateParticles;
                 _particleTimer.Start();
@@ -148,34 +239,56 @@ namespace MineRefine
             {
                 if (ParticleCanvas == null || _gameSettings.ReducedAnimations) return;
 
-                // Create new particles during mining
-                if (_autoMiningActive && _particles.Count < 20)
+                // Improved: Reduced particle count for better performance
+                var maxParticles = _gameSettings.ReducedAnimations ? 5 : 10;
+                
+                // Create new particles during mining (throttled)
+                if (_autoMiningActive && _particles.Count < maxParticles && _random.Next(0, 3) == 0)
                 {
                     CreateMiningParticle();
                 }
 
-                // Update existing particles
-                for (int i = _particles.Count - 1; i >= 0; i--)
+                // Update existing particles in batches
+                var particlesToRemove = new List<int>();
+                for (int i = 0; i < _particles.Count; i++)
                 {
                     var particle = _particles[i];
                     var currentTop = Canvas.GetTop(particle);
                     var currentLeft = Canvas.GetLeft(particle);
 
-                    // Move particle
-                    Canvas.SetTop(particle, currentTop + 2);
-                    Canvas.SetLeft(particle, currentLeft + (_random.NextDouble() - 0.5) * 2);
+                    // Move particle with reduced movement calculation
+                    var newTop = currentTop + 3;
+                    var newLeft = currentLeft + (_random.NextDouble() - 0.5) * 1.5;
+                    
+                    Canvas.SetTop(particle, newTop);
+                    Canvas.SetLeft(particle, newLeft);
 
-                    // Remove if off-screen
-                    if (currentTop > ParticleCanvas.ActualHeight)
+                    // Mark for removal if off-screen
+                    if (newTop > ParticleCanvas.ActualHeight + 20)
                     {
-                        ParticleCanvas.Children.Remove(particle);
-                        _particles.RemoveAt(i);
+                        particlesToRemove.Add(i);
+                    }
+                }
+
+                // Remove particles in reverse order to maintain indices
+                for (int i = particlesToRemove.Count - 1; i >= 0; i--)
+                {
+                    var index = particlesToRemove[i];
+                    if (index < _particles.Count)
+                    {
+                        ParticleCanvas.Children.Remove(_particles[index]);
+                        _particles.RemoveAt(index);
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"UpdateParticles error: {ex.Message}");
+                // Improved: Stop particle system on repeated errors
+                if (_particleTimer != null && ex.Message.Contains("InvalidOperation"))
+                {
+                    _particleTimer.Stop();
+                }
             }
         }
 
@@ -462,6 +575,25 @@ namespace MineRefine
                 _autoMiningTimer.Tick += async (s, e) => await AutoMineOperation();
                 _autoMiningTimer.Start();
 
+                // Improved: Thread-safe UI update
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (AutoMiningButton != null)
+                    {
+                        AutoMiningButton.Background = new SolidColorBrush(Colors.Red);
+                        AutoMiningButton.Content = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 5,
+                            Children = 
+                            {
+                                new TextBlock { Text = "⏹️", FontSize = 14 },
+                                new TextBlock { Text = "Stop Auto", FontSize = 11 }
+                            }
+                        };
+                    }
+                });
+
                 AddLogEntry("🤖 Auto-mining activated. Mining will continue automatically while you have stamina.");
             }
             catch (Exception ex)
@@ -477,6 +609,25 @@ namespace MineRefine
                 _autoMiningActive = false;
                 _autoMiningTimer?.Stop();
                 _autoMiningTimer = null;
+
+                // Improved: Thread-safe UI update
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (AutoMiningButton != null)
+                    {
+                        AutoMiningButton.Background = new SolidColorBrush(Color.FromArgb(0xAA, 0x8B, 0x45, 0x13));
+                        AutoMiningButton.Content = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 5,
+                            Children = 
+                            {
+                                new TextBlock { Text = "🤖", FontSize = 14 },
+                                new TextBlock { Text = "Auto-Mine", FontSize = 11 }
+                            }
+                        };
+                    }
+                });
 
                 AddLogEntry("⏹️ Auto-mining stopped.");
             }
@@ -500,24 +651,38 @@ namespace MineRefine
                 // Perform mining operation silently
                 var result = await _gameService.PerformMiningOperationAsync(_currentPlayer, _currentLocation, _currentRiskMultiplier);
 
-                if (result.IsSuccess && result.Mineral != null)
+                // Improved: Thread-safe UI updates
+                this.DispatcherQueue.TryEnqueue(() =>
                 {
-                    AddLogEntry($"🤖 Auto-mined: {result.Mineral.Name} (£{result.Value:N0})");
-
-                    // Update mineral stats
-                    if (!_currentPlayer.MineralStats.ContainsKey(result.Mineral.Id))
+                    if (result.IsSuccess && result.Mineral != null)
                     {
-                        _currentPlayer.MineralStats[result.Mineral.Id] = 0;
-                    }
-                    _currentPlayer.MineralStats[result.Mineral.Id]++;
-                }
+                        AddLogEntry($"🤖 Auto-mined: {result.Mineral.Name} (£{result.Value:N0})");
 
-                UpdatePlayerDisplay();
+                        // Update mineral stats
+                        if (!_currentPlayer.MineralStats.ContainsKey(result.Mineral.Id))
+                        {
+                            _currentPlayer.MineralStats[result.Mineral.Id] = 0;
+                        }
+                        _currentPlayer.MineralStats[result.Mineral.Id]++;
+                    }
+                    else
+                    {
+                        AddLogEntry($"🤖 Auto-mining failed: {result.Message}");
+                    }
+
+                    UpdatePlayerDisplay();
+                });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AutoMineOperation error: {ex.Message}");
                 StopAutoMining();
+                
+                // Improved: Thread-safe error notification
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    ShowNotification("⚠️ Auto-Mining Error", "Auto-mining encountered an error and has been stopped.");
+                });
             }
         }
 
@@ -1249,7 +1414,7 @@ namespace MineRefine
             }
         }
 
-        // Navigation handlers
+        // Navigation handlers - Updated for TabView
         private void MineTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Mine");
         private void SkillsTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Skills");
         private void AchievementsTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Achievements");
@@ -1297,38 +1462,71 @@ namespace MineRefine
 
         #region Utility Methods (Enhanced for Phase 1)
 
+        // Enhanced TabView navigation handler
+        private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (MainTabView?.SelectedItem is TabViewItem selectedTab)
+                {
+                    // Handle tab-specific logic based on selected tab
+                    var tabName = selectedTab.Name?.Replace("TabItem", "") ?? "";
+                    
+                    switch (tabName)
+                    {
+                        case "Mine":
+                            // Mine tab is always visible, no special action needed
+                            break;
+                        case "Locations":
+                            PopulateLocationsTab();
+                            break;
+                        case "Skills":
+                        case "Achievements":
+                        case "Market":
+                        case "Menu":
+                            // These tabs have static content in the XAML
+                            break;
+                    }
+                    
+                    AddLogEntry($"🗂️ Switched to {tabName} tab");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainTabView_SelectionChanged error: {ex.Message}");
+            }
+        }
+
+        // Legacy tab button handlers (for compatibility)
+        private void LocationsTabButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MainTabView != null) MainTabView.SelectedItem = LocationsTabItem;
+        }
+
+        // Simplified navigation - no longer needed with TabView
         private void SwitchToTab(string tabName)
         {
             try
             {
-                // Hide all content panels
-                if (MineContent != null) MineContent.Visibility = Visibility.Collapsed;
-                if (LocationsContent != null) LocationsContent.Visibility = Visibility.Collapsed;
-                if (SkillsContent != null) SkillsContent.Visibility = Visibility.Collapsed;
-                if (AchievementsContent != null) AchievementsContent.Visibility = Visibility.Collapsed;
-                if (MarketContent != null) MarketContent.Visibility = Visibility.Collapsed;
-                if (MenuContent != null) MenuContent.Visibility = Visibility.Collapsed;
-
-                // Show selected tab
                 switch (tabName)
                 {
                     case "Mine":
-                        if (MineContent != null) MineContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MineTabItem;
                         break;
                     case "Locations":
-                        if (LocationsContent != null) LocationsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = LocationsTabItem;
                         break;
                     case "Skills":
-                        if (SkillsContent != null) SkillsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = SkillsTabItem;
                         break;
                     case "Achievements":
-                        if (AchievementsContent != null) AchievementsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = AchievementsTabItem;
                         break;
                     case "Market":
-                        if (MarketContent != null) MarketContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MarketTabItem;
                         break;
                     case "Menu":
-                        if (MenuContent != null) MenuContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MenuTabItem;
                         break;
                 }
             }
@@ -1387,6 +1585,8 @@ namespace MineRefine
             return null;
         }
 
+        private DispatcherTimer? _loadingTimer;
+
         private void ShowLoading(string message = "Loading...")
         {
             try
@@ -1394,6 +1594,18 @@ namespace MineRefine
                 if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
                 if (LoadingTitle != null) LoadingTitle.Text = "Processing...";
                 if (LoadingMessage != null) LoadingMessage.Text = message;
+
+                // Improved: Add timeout protection to prevent infinite loading
+                _loadingTimer?.Stop();
+                _loadingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) }; // 30 second timeout
+                _loadingTimer.Tick += (s, e) =>
+                {
+                    _loadingTimer.Stop();
+                    HideLoading();
+                    ShowNotification("⚠️ Operation Timeout", "The operation took too long and was cancelled.");
+                    System.Diagnostics.Debug.WriteLine("Loading timeout reached - hiding loading overlay");
+                };
+                _loadingTimer.Start();
             }
             catch (Exception ex)
             {
@@ -1405,6 +1617,10 @@ namespace MineRefine
         {
             try
             {
+                // Stop timeout timer
+                _loadingTimer?.Stop();
+                _loadingTimer = null;
+
                 if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
@@ -1421,8 +1637,35 @@ namespace MineRefine
                 if (NotificationTitle != null) NotificationTitle.Text = title;
                 if (NotificationMessage != null) NotificationMessage.Text = message;
 
-                // Auto-hide after 6 seconds
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(6) };
+                // Improved: Visual feedback based on notification type
+                if (NotificationBorder != null)
+                {
+                    if (title.Contains("⚠️") || title.Contains("Error"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Red);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x4A, 0x1A, 0x1A));
+                    }
+                    else if (title.Contains("✅") || title.Contains("Success"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Green);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x1A, 0x4A, 0x1A));
+                    }
+                    else if (title.Contains("⚡") || title.Contains("Auto-Mining"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Orange);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x4A, 0x3A, 0x1A));
+                    }
+                    else
+                    {
+                        // Default styling
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xD7, 0x00));
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x2D, 0x2D, 0x30));
+                    }
+                }
+
+                // Auto-hide after 6 seconds (or longer for errors)
+                var hideDelay = title.Contains("⚠️") || title.Contains("Error") ? 10 : 6;
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(hideDelay) };
                 timer.Tick += (s, e) =>
                 {
                     timer.Stop();
