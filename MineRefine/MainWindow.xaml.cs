@@ -2703,9 +2703,9 @@ namespace MineRefine
                     var effect = _weatherService.GetCurrentWeatherEffect();
                     WeatherTextBlock.Text = $"{effect.Icon} {effect.Name}";
                     
-                    // Update tooltip with detailed weather info
-                    ToolTipService.SetToolTip(WeatherTextBlock, 
-                        $"{effect.Description}\n{_weatherService.GetWeatherImpactDescription()}\n{_weatherService.GetWeatherForecast()}");
+                    // Update tooltip with detailed weather info - Commented out due to ToolTipService dependency
+                    // ToolTipService.SetToolTip(WeatherTextBlock, 
+                    //     $"{effect.Description}\n{_weatherService.GetWeatherImpactDescription()}\n{_weatherService.GetWeatherForecast()}");
                 }
             }
             catch (Exception ex)
