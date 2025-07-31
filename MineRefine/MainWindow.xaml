@@ -142,365 +142,342 @@
                 </Grid>
             </Border>
 
-            <!-- Tab Navigation -->
+            <!-- Enhanced Tab Navigation with Content -->
             <Border Grid.Row="1" Background="#AA2D2D30" CornerRadius="0" Margin="5,0,5,0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                    <Button x:Name="MineTabButton" Style="{StaticResource TabButtonStyle}" Click="MineTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="⛏️" FontSize="16"/>
-                            <TextBlock Text="MINE" FontWeight="Bold"/>
+                <TabView x:Name="MainTabView" 
+                         Style="{StaticResource UltimateTabViewStyle}"
+                         SelectionChanged="MainTabView_SelectionChanged">
+                    
+                    <!-- Mining Tab -->
+                    <TabViewItem x:Name="MineTabItem" Header="⛏️ MINE" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <ScrollViewer x:Name="MineContent" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Main Mining Panel -->
+                                <StackPanel Grid.Column="0" Spacing="15">
+                                    <!-- Player Status Card -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Player Info -->
+                                            <StackPanel Grid.Column="0" Spacing="8">
+                                                <TextBlock Text="👤 Miner Profile" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock x:Name="PlayerNameTextBlock" Text="Anonymous Miner" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                    <TextBlock x:Name="PlayerRankTextBlock" Text="Novice Miner" FontSize="12" Foreground="LightGray"/>
+                                                    <TextBlock x:Name="PlayerLevelTextBlock" Text="Level 1" FontSize="12" Foreground="LightBlue"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Financial Status -->
+                                            <StackPanel Grid.Column="1" Spacing="8">
+                                                <TextBlock Text="💰 Financial Status" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock x:Name="PlayerMoneyTextBlock" Text="£0" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                    <TextBlock x:Name="TotalEarningsTextBlock" Text="Lifetime: £0" FontSize="12" Foreground="LightGray"/>
+                                                    <TextBlock x:Name="PlayerNetWorthTextBlock" Text="Net Worth: £0" FontSize="12" Foreground="Gold"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Mining Stats -->
+                                            <StackPanel Grid.Column="2" Spacing="8">
+                                                <TextBlock Text="⛏️ Mining Stats" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock x:Name="TotalMinesTextBlock" Text="Mines: 0" FontSize="12" Foreground="White"/>
+                                                    <TextBlock x:Name="SuccessRateTextBlock" Text="Success: 0%" FontSize="12" Foreground="LightGreen"/>
+                                                    <TextBlock x:Name="SkillPointsTextBlock" Text="Skill Points: 0" FontSize="12" Foreground="LightBlue"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Location and Risk Selection -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <StackPanel Spacing="15">
+                                            <TextBlock Text="🗺️ Mining Location &amp; Risk Assessment" FontSize="18" FontWeight="Bold" Foreground="#FFD700"/>
+
+                                            <!-- Location Selection -->
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="Current Mining Location" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                <ComboBox x:Name="LocationComboBox" 
+                                                          FontSize="14" 
+                                                          Background="#AA2D2D30" 
+                                                          Foreground="White" 
+                                                          BorderBrush="#60FFD700" 
+                                                          BorderThickness="2,2,2,2"
+                                                          SelectionChanged="LocationComboBox_SelectionChanged"/>
+                                                <TextBlock x:Name="LocationDescriptionTextBlock" 
+                                                           Text="Select a location to begin mining operations" 
+                                                           FontSize="12" 
+                                                           Foreground="LightGray" 
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+
+                                            <!-- Weather and Environment -->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" Spacing="5">
+                                                    <TextBlock Text="🌤️ Environmental Conditions" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                                        <TextBlock Text="Weather:" FontSize="12" Foreground="LightGray"/>
+                                                        <TextBlock x:Name="WeatherTextBlock" Text="Clear" FontSize="12" Foreground="LightGreen"/>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                                        <TextBlock Text="Location:" FontSize="12" Foreground="LightGray"/>
+                                                        <TextBlock x:Name="CurrentLocationTextBlock" Text="None" FontSize="12" Foreground="White"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" Spacing="5">
+                                                    <TextBlock Text="⚡ Energy Status" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                    <StackPanel Spacing="3">
+                                                        <TextBlock Text="Stamina" FontSize="12" Foreground="LightGray"/>
+                                                        <ProgressBar x:Name="StaminaProgressBar" 
+                                                                   Height="8" 
+                                                                   Minimum="0" 
+                                                                   Maximum="100" 
+                                                                   Value="100" 
+                                                                   Foreground="LightGreen"/>
+                                                        <TextBlock Text="Experience" FontSize="12" Foreground="LightGray"/>
+                                                        <ProgressBar x:Name="ExperienceProgressBar" 
+                                                                   Height="6" 
+                                                                   Minimum="0" 
+                                                                   Maximum="100" 
+                                                                   Value="0" 
+                                                                   Foreground="LightBlue"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Risk Assessment -->
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="⚠️ Risk Assessment Protocol" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                <Slider x:Name="RiskSlider" 
+                                                        Minimum="1.0" 
+                                                        Maximum="3.0" 
+                                                        Value="1.5" 
+                                                        StepFrequency="0.1" 
+                                                        TickFrequency="0.5" 
+                                                        TickPlacement="BottomRight"
+                                                        ValueChanged="RiskSlider_ValueChanged"/>
+                                                <TextBlock x:Name="RiskDescriptionTextBlock" 
+                                                           Text="Balanced Protocol (Moderate Risk, Good Rewards) (1.5x)" 
+                                                           FontSize="12" 
+                                                           Foreground="Orange" 
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+
+                                            <!-- Mining Actions -->
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="15">
+                                                <Button x:Name="MineButton" 
+                                                        Style="{StaticResource ActionButtonStyle}" 
+                                                        MinWidth="150" 
+                                                        MinHeight="50"
+                                                        Click="MineButton_Click">
+                                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                                        <TextBlock Text="⛏️" FontSize="20"/>
+                                                        <TextBlock Text="START MINING" FontSize="14" FontWeight="Bold"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <Button x:Name="RestButton" 
+                                                        Style="{StaticResource ActionButtonStyle}" 
+                                                        Background="#AA4682B4"
+                                                        Click="RestButton_Click">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="😴" FontSize="16"/>
+                                                        <TextBlock Text="REST" FontWeight="Bold"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Mining Session History -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <StackPanel Spacing="10">
+                                            <StackPanel Orientation="Horizontal" Spacing="15">
+                                                <TextBlock Text="📊 Recent Mining Operations" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                                <Button x:Name="ClearLogButton" 
+                                                        Content="🧹 Clear Log" 
+                                                        FontSize="10" 
+                                                        Background="Transparent" 
+                                                        Foreground="LightGray" 
+                                                        BorderThickness="1,1,1,1" 
+                                                        BorderBrush="Gray"
+                                                        Padding="8,4,8,4"
+                                                        Click="ClearLogButton_Click"/>
+                                            </StackPanel>
+
+                                            <ScrollViewer Height="200" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="GameLogPanel" Spacing="2"/>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Right Sidebar -->
+                                <StackPanel Grid.Column="1" Spacing="15" Margin="15,0,0,0">
+                                    <!-- Equipment Status -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="⚒️ Equipment Status" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                            <ScrollViewer x:Name="EquipmentScrollViewer" Height="150" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="EquipmentPanel" Spacing="8"/>
+                                            </ScrollViewer>
+                                            <Button Content="🔧 Manage Equipment" 
+                                                    Background="#AA800080" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="10,5,10,5"
+                                                    Click="UpgradesButton_Click"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Market Overview -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="📈 Market Overview" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                            <StackPanel x:Name="MarketOverviewPanel" Spacing="5"/>
+                                            <Button Content="📊 Full Market" 
+                                                    Background="#AA4169E1" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="10,5,10,5"
+                                                    Click="MarketTabButton_Click"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Quick Actions -->
+                                    <Border Style="{StaticResource CardStyle}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="🚀 Quick Actions" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                            <StackPanel Spacing="8">
+                                                <Button x:Name="StartNewGameButton" 
+                                                        Content="🎮 New Game" 
+                                                        Background="#AA228B22" 
+                                                        Foreground="White" 
+                                                        CornerRadius="6" 
+                                                        Padding="10,5,10,5"
+                                                        Click="StartNewGameButton_Click"/>
+                                                <Button x:Name="LoadExistingGameButton" 
+                                                        Content="📁 Load Game" 
+                                                        Background="#AA4682B4" 
+                                                        Foreground="White" 
+                                                        CornerRadius="6" 
+                                                        Padding="10,5,10,5"
+                                                        Click="LoadExistingGameButton_Click"/>
+                                                <Button x:Name="ChallengesButton" 
+                                                        Content="🎯 Challenges" 
+                                                        Background="#AAB8860B" 
+                                                        Foreground="White" 
+                                                        CornerRadius="6" 
+                                                        Padding="10,5,10,5"
+                                                        Click="ChallengesButton_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </TabViewItem>
+
+                    <!-- Locations Tab -->
+                    <TabViewItem x:Name="LocationsTabItem" Header="🗺️ LOCATIONS" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <StackPanel x:Name="LocationsContent" Spacing="15"/>
+                    </TabViewItem>
+
+                    <!-- Skills Tab -->
+                    <TabViewItem x:Name="SkillsTabItem" Header="⚡ SKILLS" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <StackPanel x:Name="SkillsContent" Spacing="15">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel Spacing="15" HorizontalAlignment="Center">
+                                    <TextBlock Text="⚡ SKILL DEVELOPMENT" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="🚧 Skills system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Future features will include:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
+                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                        <TextBlock Text="• Interactive skill tree with specialization paths" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Mining efficiency and equipment bonuses" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Quantum mining unlocks and abilities" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Prestige system for advanced players" FontSize="12" Foreground="LightGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Button>
-                    <Button x:Name="LocationsTabButton" Style="{StaticResource TabButtonStyle}" Click="LocationsTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="🗺️" FontSize="16"/>
-                            <TextBlock Text="LOCATIONS" FontWeight="Bold"/>
+                    </TabViewItem>
+
+                    <!-- Achievements Tab -->
+                    <TabViewItem x:Name="AchievementsTabItem" Header="🏆 ACHIEVEMENTS" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <StackPanel x:Name="AchievementsContent" Spacing="15">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel Spacing="15" HorizontalAlignment="Center">
+                                    <TextBlock Text="🏆 ACHIEVEMENTS" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="🚧 Achievement system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Planned achievement categories:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
+                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                        <TextBlock Text="• Mining milestones and discovery achievements" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Financial and progression goals" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Quantum realm exploration badges" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Hidden achievements for dedicated miners" FontSize="12" Foreground="LightGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Button>
-                    <Button x:Name="SkillsTabButton" Style="{StaticResource TabButtonStyle}" Click="SkillsTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="⚡" FontSize="16"/>
-                            <TextBlock Text="SKILLS" FontWeight="Bold"/>
+                    </TabViewItem>
+
+                    <!-- Market Tab -->
+                    <TabViewItem x:Name="MarketTabItem" Header="📈 MARKET" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <StackPanel x:Name="MarketContent" Spacing="15">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel Spacing="15" HorizontalAlignment="Center">
+                                    <TextBlock Text="📈 MINERAL MARKET" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="🚧 Market system coming in Phase 3!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Upcoming market features:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
+                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                        <TextBlock Text="• Real-time mineral price tracking and charts" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Economic events affecting market conditions" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Trading contracts and investment opportunities" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Market analysis and trend predictions" FontSize="12" Foreground="LightGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Button>
-                    <Button x:Name="AchievementsTabButton" Style="{StaticResource TabButtonStyle}" Click="AchievementsTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="🏆" FontSize="16"/>
-                            <TextBlock Text="ACHIEVEMENTS" FontWeight="Bold"/>
+                    </TabViewItem>
+
+                    <!-- Menu Tab -->
+                    <TabViewItem x:Name="MenuTabItem" Header="⚙️ MENU" Style="{StaticResource UltimateTabViewItemStyle}">
+                        <StackPanel x:Name="MenuContent" Spacing="15">
+                            <Border Style="{StaticResource CardStyle}">
+                                <StackPanel Spacing="15" HorizontalAlignment="Center">
+                                    <TextBlock Text="⚙️ GAME MENU" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="🚧 Advanced menu system coming in Phase 4!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Planned menu features:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
+                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                        <TextBlock Text="• Comprehensive game settings and preferences" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Detailed statistics and analytics dashboard" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Save/load management with cloud sync" FontSize="12" Foreground="LightGray"/>
+                                        <TextBlock Text="• Help system and interactive tutorials" FontSize="12" Foreground="LightGray"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                    </Button>
-                    <Button x:Name="MarketTabButton" Style="{StaticResource TabButtonStyle}" Click="MarketTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="📈" FontSize="16"/>
-                            <TextBlock Text="MARKET" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="MenuTabButton" Style="{StaticResource TabButtonStyle}" Click="MenuTabButton_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="⚙️" FontSize="16"/>
-                            <TextBlock Text="MENU" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+                    </TabViewItem>
+                </TabView>
             </Border>
 
-            <!-- Main Content Area -->
-            <Grid Grid.Row="2" Margin="5,5,5,5">
-                <!-- Mining Tab Content -->
-                <ScrollViewer x:Name="MineContent" VerticalScrollBarVisibility="Auto">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Main Mining Panel -->
-                        <StackPanel Grid.Column="0" Spacing="15">
-                            <!-- Player Status Card -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Player Info -->
-                                    <StackPanel Grid.Column="0" Spacing="8">
-                                        <TextBlock Text="👤 Miner Profile" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                        <StackPanel Spacing="3">
-                                            <TextBlock x:Name="PlayerNameTextBlock" Text="Anonymous Miner" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                            <TextBlock x:Name="PlayerRankTextBlock" Text="Novice Miner" FontSize="12" Foreground="LightGray"/>
-                                            <TextBlock x:Name="PlayerLevelTextBlock" Text="Level 1" FontSize="12" Foreground="LightBlue"/>
-                                        </StackPanel>
-                                    </StackPanel>
-
-                                    <!-- Financial Status -->
-                                    <StackPanel Grid.Column="1" Spacing="8">
-                                        <TextBlock Text="💰 Financial Status" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                        <StackPanel Spacing="3">
-                                            <TextBlock x:Name="PlayerMoneyTextBlock" Text="£0" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                            <TextBlock x:Name="TotalEarningsTextBlock" Text="Lifetime: £0" FontSize="12" Foreground="LightGray"/>
-                                            <TextBlock x:Name="PlayerNetWorthTextBlock" Text="Net Worth: £0" FontSize="12" Foreground="Gold"/>
-                                        </StackPanel>
-                                    </StackPanel>
-
-                                    <!-- Mining Stats -->
-                                    <StackPanel Grid.Column="2" Spacing="8">
-                                        <TextBlock Text="⛏️ Mining Stats" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                        <StackPanel Spacing="3">
-                                            <TextBlock x:Name="TotalMinesTextBlock" Text="Mines: 0" FontSize="12" Foreground="White"/>
-                                            <TextBlock x:Name="SuccessRateTextBlock" Text="Success: 0%" FontSize="12" Foreground="LightGreen"/>
-                                            <TextBlock x:Name="SkillPointsTextBlock" Text="Skill Points: 0" FontSize="12" Foreground="LightBlue"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-
-                            <!-- Location and Risk Selection -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="15">
-                                    <TextBlock Text="🗺️ Mining Location &amp; Risk Assessment" FontSize="18" FontWeight="Bold" Foreground="#FFD700"/>
-
-                                    <!-- Location Selection -->
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="Current Mining Location" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                        <ComboBox x:Name="LocationComboBox" 
-                                                  FontSize="14" 
-                                                  Background="#AA2D2D30" 
-                                                  Foreground="White" 
-                                                  BorderBrush="#60FFD700" 
-                                                  BorderThickness="2,2,2,2"
-                                                  SelectionChanged="LocationComboBox_SelectionChanged"/>
-                                        <TextBlock x:Name="LocationDescriptionTextBlock" 
-                                                   Text="Select a location to begin mining operations" 
-                                                   FontSize="12" 
-                                                   Foreground="LightGray" 
-                                                   TextWrapping="Wrap"/>
-                                    </StackPanel>
-
-                                    <!-- Weather and Environment -->
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0" Spacing="5">
-                                            <TextBlock Text="🌤️ Environmental Conditions" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <TextBlock Text="Weather:" FontSize="12" Foreground="LightGray"/>
-                                                <TextBlock x:Name="WeatherTextBlock" Text="Clear" FontSize="12" Foreground="LightGreen"/>
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <TextBlock Text="Location:" FontSize="12" Foreground="LightGray"/>
-                                                <TextBlock x:Name="CurrentLocationTextBlock" Text="None" FontSize="12" Foreground="White"/>
-                                            </StackPanel>
-                                        </StackPanel>
-
-                                        <StackPanel Grid.Column="1" Spacing="5">
-                                            <TextBlock Text="⚡ Energy Status" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                            <StackPanel Spacing="3">
-                                                <TextBlock Text="Stamina" FontSize="12" Foreground="LightGray"/>
-                                                <ProgressBar x:Name="StaminaProgressBar" 
-                                                           Height="8" 
-                                                           Minimum="0" 
-                                                           Maximum="100" 
-                                                           Value="100" 
-                                                           Foreground="LightGreen"/>
-                                                <TextBlock Text="Experience" FontSize="12" Foreground="LightGray"/>
-                                                <ProgressBar x:Name="ExperienceProgressBar" 
-                                                           Height="6" 
-                                                           Minimum="0" 
-                                                           Maximum="100" 
-                                                           Value="0" 
-                                                           Foreground="LightBlue"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <!-- Risk Assessment -->
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="⚠️ Risk Assessment Protocol" FontSize="14" FontWeight="Bold" Foreground="White"/>
-                                        <Slider x:Name="RiskSlider" 
-                                                Minimum="1.0" 
-                                                Maximum="3.0" 
-                                                Value="1.5" 
-                                                StepFrequency="0.1" 
-                                                TickFrequency="0.5" 
-                                                TickPlacement="BottomRight"
-                                                ValueChanged="RiskSlider_ValueChanged"/>
-                                        <TextBlock x:Name="RiskDescriptionTextBlock" 
-                                                   Text="Balanced Protocol (Moderate Risk, Good Rewards) (1.5x)" 
-                                                   FontSize="12" 
-                                                   Foreground="Orange" 
-                                                   TextWrapping="Wrap"/>
-                                    </StackPanel>
-
-                                    <!-- Mining Actions -->
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="15">
-                                        <Button x:Name="MineButton" 
-                                                Style="{StaticResource ActionButtonStyle}" 
-                                                MinWidth="150" 
-                                                MinHeight="50"
-                                                Click="MineButton_Click">
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <TextBlock Text="⛏️" FontSize="20"/>
-                                                <TextBlock Text="START MINING" FontSize="14" FontWeight="Bold"/>
-                                            </StackPanel>
-                                        </Button>
-
-                                        <Button x:Name="RestButton" 
-                                                Style="{StaticResource ActionButtonStyle}" 
-                                                Background="#AA4682B4"
-                                                Click="RestButton_Click">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="😴" FontSize="16"/>
-                                                <TextBlock Text="REST" FontWeight="Bold"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Mining Session History -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="10">
-                                    <StackPanel Orientation="Horizontal" Spacing="15">
-                                        <TextBlock Text="📊 Recent Mining Operations" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                        <Button x:Name="ClearLogButton" 
-                                                Content="🧹 Clear Log" 
-                                                FontSize="10" 
-                                                Background="Transparent" 
-                                                Foreground="LightGray" 
-                                                BorderThickness="1,1,1,1" 
-                                                BorderBrush="Gray"
-                                                Padding="8,4,8,4"
-                                                Click="ClearLogButton_Click"/>
-                                    </StackPanel>
-
-                                    <ScrollViewer Height="200" VerticalScrollBarVisibility="Auto">
-                                        <StackPanel x:Name="GameLogPanel" Spacing="2"/>
-                                    </ScrollViewer>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Right Sidebar -->
-                        <StackPanel Grid.Column="1" Spacing="15" Margin="15,0,0,0">
-                            <!-- Equipment Status -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="⚒️ Equipment Status" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                    <ScrollViewer x:Name="EquipmentScrollViewer" Height="150" VerticalScrollBarVisibility="Auto">
-                                        <StackPanel x:Name="EquipmentPanel" Spacing="8"/>
-                                    </ScrollViewer>
-                                    <Button Content="🔧 Manage Equipment" 
-                                            Background="#AA800080" 
-                                            Foreground="White" 
-                                            CornerRadius="6" 
-                                            Padding="10,5,10,5"
-                                            Click="UpgradesButton_Click"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Market Overview -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="📈 Market Overview" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                    <StackPanel x:Name="MarketOverviewPanel" Spacing="5"/>
-                                    <Button Content="📊 Full Market" 
-                                            Background="#AA4169E1" 
-                                            Foreground="White" 
-                                            CornerRadius="6" 
-                                            Padding="10,5,10,5"
-                                            Click="MarketTabButton_Click"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Quick Actions -->
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="🚀 Quick Actions" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
-                                    <StackPanel Spacing="8">
-                                        <Button x:Name="StartNewGameButton" 
-                                                Content="🎮 New Game" 
-                                                Background="#AA228B22" 
-                                                Foreground="White" 
-                                                CornerRadius="6" 
-                                                Padding="10,5,10,5"
-                                                Click="StartNewGameButton_Click"/>
-                                        <Button x:Name="LoadExistingGameButton" 
-                                                Content="📁 Load Game" 
-                                                Background="#AA4682B4" 
-                                                Foreground="White" 
-                                                CornerRadius="6" 
-                                                Padding="10,5,10,5"
-                                                Click="LoadExistingGameButton_Click"/>
-                                        <Button x:Name="ChallengesButton" 
-                                                Content="🎯 Challenges" 
-                                                Background="#AAB8860B" 
-                                                Foreground="White" 
-                                                CornerRadius="6" 
-                                                Padding="10,5,10,5"
-                                                Click="ChallengesButton_Click"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </ScrollViewer>
-
-                <!-- Locations Tab Content -->
-                <StackPanel x:Name="LocationsContent" Spacing="15" Visibility="Collapsed"/>
-
-                <!-- Skills Tab Content -->
-                <StackPanel x:Name="SkillsContent" Spacing="15" Visibility="Collapsed">
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel Spacing="15" HorizontalAlignment="Center">
-                            <TextBlock Text="⚡ SKILL DEVELOPMENT" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                            <TextBlock Text="🚧 Skills system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Future features will include:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="• Interactive skill tree with specialization paths" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Mining efficiency and equipment bonuses" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Quantum mining unlocks and abilities" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Prestige system for advanced players" FontSize="12" Foreground="LightGray"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <!-- Achievements Tab Content -->
-                <StackPanel x:Name="AchievementsContent" Spacing="15" Visibility="Collapsed">
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel Spacing="15" HorizontalAlignment="Center">
-                            <TextBlock Text="🏆 ACHIEVEMENTS" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                            <TextBlock Text="🚧 Achievement system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Planned achievement categories:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="• Mining milestones and discovery achievements" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Financial and progression goals" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Quantum realm exploration badges" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Hidden achievements for dedicated miners" FontSize="12" Foreground="LightGray"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <!-- Market Tab Content -->
-                <StackPanel x:Name="MarketContent" Spacing="15" Visibility="Collapsed">
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel Spacing="15" HorizontalAlignment="Center">
-                            <TextBlock Text="📈 MINERAL MARKET" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                            <TextBlock Text="🚧 Market system coming in Phase 3!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Upcoming market features:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="• Real-time mineral price tracking and charts" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Economic events affecting market conditions" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Trading contracts and investment opportunities" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Market analysis and trend predictions" FontSize="12" Foreground="LightGray"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <!-- Menu Tab Content -->
-                <StackPanel x:Name="MenuContent" Spacing="15" Visibility="Collapsed">
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel Spacing="15" HorizontalAlignment="Center">
-                            <TextBlock Text="⚙️ GAME MENU" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                            <TextBlock Text="🚧 Advanced menu system coming in Phase 4!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Planned menu features:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="• Comprehensive game settings and preferences" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Detailed statistics and analytics dashboard" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Save/load management with cloud sync" FontSize="12" Foreground="LightGray"/>
-                                <TextBlock Text="• Help system and interactive tutorials" FontSize="12" Foreground="LightGray"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
             </Grid>
         </Grid>
 

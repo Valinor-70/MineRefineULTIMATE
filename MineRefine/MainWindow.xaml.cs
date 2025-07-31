@@ -53,8 +53,48 @@ namespace MineRefine
 
             this.Title = "Mine & Refine Ultimate Edition - Alpha v1.0.0";
 
+            // Improved: Add proper cleanup event handlers
+            this.Closed += MainWindow_Closed;
+
             // Initialize game immediately since we have player data
             _ = Task.Run(InitializeGameAsync);
+        }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs e)
+        {
+            try
+            {
+                // Cleanup resources to prevent memory leaks
+                StopAutoMining();
+                
+                // Stop all timers
+                _particleTimer?.Stop();
+                _autoMiningTimer?.Stop();
+                
+                // Clear particle system
+                if (ParticleCanvas != null)
+                {
+                    ParticleCanvas.Children.Clear();
+                    _particles.Clear();
+                }
+
+                // Save current state
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _dataService.SavePlayerAsync(_currentPlayer);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainWindow_Closed save error: {ex.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainWindow_Closed error: {ex.Message}");
+            }
         }
 
         #region Initialization
@@ -131,11 +171,12 @@ namespace MineRefine
 
         private void InitializeParticleSystem()
         {
-            if (!_gameSettings.AnimationSpeed.Equals(0.0))
+            if (!_gameSettings.AnimationSpeed.Equals(0.0) && !_gameSettings.ReducedAnimations)
             {
                 _particleTimer = new DispatcherTimer
                 {
-                    Interval = TimeSpan.FromMilliseconds(100 / _gameSettings.AnimationSpeed)
+                    // Improved: Reduced frequency for better performance
+                    Interval = TimeSpan.FromMilliseconds(Math.Max(200, 300 / _gameSettings.AnimationSpeed))
                 };
                 _particleTimer.Tick += UpdateParticles;
                 _particleTimer.Start();
@@ -148,34 +189,56 @@ namespace MineRefine
             {
                 if (ParticleCanvas == null || _gameSettings.ReducedAnimations) return;
 
-                // Create new particles during mining
-                if (_autoMiningActive && _particles.Count < 20)
+                // Improved: Reduced particle count for better performance
+                var maxParticles = _gameSettings.ReducedAnimations ? 5 : 10;
+                
+                // Create new particles during mining (throttled)
+                if (_autoMiningActive && _particles.Count < maxParticles && _random.Next(0, 3) == 0)
                 {
                     CreateMiningParticle();
                 }
 
-                // Update existing particles
-                for (int i = _particles.Count - 1; i >= 0; i--)
+                // Update existing particles in batches
+                var particlesToRemove = new List<int>();
+                for (int i = 0; i < _particles.Count; i++)
                 {
                     var particle = _particles[i];
                     var currentTop = Canvas.GetTop(particle);
                     var currentLeft = Canvas.GetLeft(particle);
 
-                    // Move particle
-                    Canvas.SetTop(particle, currentTop + 2);
-                    Canvas.SetLeft(particle, currentLeft + (_random.NextDouble() - 0.5) * 2);
+                    // Move particle with reduced movement calculation
+                    var newTop = currentTop + 3;
+                    var newLeft = currentLeft + (_random.NextDouble() - 0.5) * 1.5;
+                    
+                    Canvas.SetTop(particle, newTop);
+                    Canvas.SetLeft(particle, newLeft);
 
-                    // Remove if off-screen
-                    if (currentTop > ParticleCanvas.ActualHeight)
+                    // Mark for removal if off-screen
+                    if (newTop > ParticleCanvas.ActualHeight + 20)
                     {
-                        ParticleCanvas.Children.Remove(particle);
-                        _particles.RemoveAt(i);
+                        particlesToRemove.Add(i);
+                    }
+                }
+
+                // Remove particles in reverse order to maintain indices
+                for (int i = particlesToRemove.Count - 1; i >= 0; i--)
+                {
+                    var index = particlesToRemove[i];
+                    if (index < _particles.Count)
+                    {
+                        ParticleCanvas.Children.Remove(_particles[index]);
+                        _particles.RemoveAt(index);
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"UpdateParticles error: {ex.Message}");
+                // Improved: Stop particle system on repeated errors
+                if (_particleTimer != null && ex.Message.Contains("InvalidOperation"))
+                {
+                    _particleTimer.Stop();
+                }
             }
         }
 
@@ -462,6 +525,25 @@ namespace MineRefine
                 _autoMiningTimer.Tick += async (s, e) => await AutoMineOperation();
                 _autoMiningTimer.Start();
 
+                // Improved: Thread-safe UI update
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (AutoMiningButton != null)
+                    {
+                        AutoMiningButton.Background = new SolidColorBrush(Colors.Red);
+                        AutoMiningButton.Content = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 5,
+                            Children = 
+                            {
+                                new TextBlock { Text = "⏹️", FontSize = 14 },
+                                new TextBlock { Text = "Stop Auto", FontSize = 11 }
+                            }
+                        };
+                    }
+                });
+
                 AddLogEntry("🤖 Auto-mining activated. Mining will continue automatically while you have stamina.");
             }
             catch (Exception ex)
@@ -477,6 +559,25 @@ namespace MineRefine
                 _autoMiningActive = false;
                 _autoMiningTimer?.Stop();
                 _autoMiningTimer = null;
+
+                // Improved: Thread-safe UI update
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (AutoMiningButton != null)
+                    {
+                        AutoMiningButton.Background = new SolidColorBrush(Color.FromArgb(0xAA, 0x8B, 0x45, 0x13));
+                        AutoMiningButton.Content = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 5,
+                            Children = 
+                            {
+                                new TextBlock { Text = "🤖", FontSize = 14 },
+                                new TextBlock { Text = "Auto-Mine", FontSize = 11 }
+                            }
+                        };
+                    }
+                });
 
                 AddLogEntry("⏹️ Auto-mining stopped.");
             }
@@ -500,24 +601,38 @@ namespace MineRefine
                 // Perform mining operation silently
                 var result = await _gameService.PerformMiningOperationAsync(_currentPlayer, _currentLocation, _currentRiskMultiplier);
 
-                if (result.IsSuccess && result.Mineral != null)
+                // Improved: Thread-safe UI updates
+                this.DispatcherQueue.TryEnqueue(() =>
                 {
-                    AddLogEntry($"🤖 Auto-mined: {result.Mineral.Name} (£{result.Value:N0})");
-
-                    // Update mineral stats
-                    if (!_currentPlayer.MineralStats.ContainsKey(result.Mineral.Id))
+                    if (result.IsSuccess && result.Mineral != null)
                     {
-                        _currentPlayer.MineralStats[result.Mineral.Id] = 0;
-                    }
-                    _currentPlayer.MineralStats[result.Mineral.Id]++;
-                }
+                        AddLogEntry($"🤖 Auto-mined: {result.Mineral.Name} (£{result.Value:N0})");
 
-                UpdatePlayerDisplay();
+                        // Update mineral stats
+                        if (!_currentPlayer.MineralStats.ContainsKey(result.Mineral.Id))
+                        {
+                            _currentPlayer.MineralStats[result.Mineral.Id] = 0;
+                        }
+                        _currentPlayer.MineralStats[result.Mineral.Id]++;
+                    }
+                    else
+                    {
+                        AddLogEntry($"🤖 Auto-mining failed: {result.Message}");
+                    }
+
+                    UpdatePlayerDisplay();
+                });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AutoMineOperation error: {ex.Message}");
                 StopAutoMining();
+                
+                // Improved: Thread-safe error notification
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    ShowNotification("⚠️ Auto-Mining Error", "Auto-mining encountered an error and has been stopped.");
+                });
             }
         }
 
@@ -1249,7 +1364,7 @@ namespace MineRefine
             }
         }
 
-        // Navigation handlers
+        // Navigation handlers - Updated for TabView
         private void MineTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Mine");
         private void SkillsTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Skills");
         private void AchievementsTabButton_Click(object sender, RoutedEventArgs e) => SwitchToTab("Achievements");
@@ -1297,38 +1412,71 @@ namespace MineRefine
 
         #region Utility Methods (Enhanced for Phase 1)
 
+        // Enhanced TabView navigation handler
+        private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (MainTabView?.SelectedItem is TabViewItem selectedTab)
+                {
+                    // Handle tab-specific logic based on selected tab
+                    var tabName = selectedTab.Name?.Replace("TabItem", "") ?? "";
+                    
+                    switch (tabName)
+                    {
+                        case "Mine":
+                            // Mine tab is always visible, no special action needed
+                            break;
+                        case "Locations":
+                            PopulateLocationsTab();
+                            break;
+                        case "Skills":
+                        case "Achievements":
+                        case "Market":
+                        case "Menu":
+                            // These tabs have static content in the XAML
+                            break;
+                    }
+                    
+                    AddLogEntry($"🗂️ Switched to {tabName} tab");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainTabView_SelectionChanged error: {ex.Message}");
+            }
+        }
+
+        // Legacy tab button handlers (for compatibility)
+        private void LocationsTabButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MainTabView != null) MainTabView.SelectedItem = LocationsTabItem;
+        }
+
+        // Simplified navigation - no longer needed with TabView
         private void SwitchToTab(string tabName)
         {
             try
             {
-                // Hide all content panels
-                if (MineContent != null) MineContent.Visibility = Visibility.Collapsed;
-                if (LocationsContent != null) LocationsContent.Visibility = Visibility.Collapsed;
-                if (SkillsContent != null) SkillsContent.Visibility = Visibility.Collapsed;
-                if (AchievementsContent != null) AchievementsContent.Visibility = Visibility.Collapsed;
-                if (MarketContent != null) MarketContent.Visibility = Visibility.Collapsed;
-                if (MenuContent != null) MenuContent.Visibility = Visibility.Collapsed;
-
-                // Show selected tab
                 switch (tabName)
                 {
                     case "Mine":
-                        if (MineContent != null) MineContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MineTabItem;
                         break;
                     case "Locations":
-                        if (LocationsContent != null) LocationsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = LocationsTabItem;
                         break;
                     case "Skills":
-                        if (SkillsContent != null) SkillsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = SkillsTabItem;
                         break;
                     case "Achievements":
-                        if (AchievementsContent != null) AchievementsContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = AchievementsTabItem;
                         break;
                     case "Market":
-                        if (MarketContent != null) MarketContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MarketTabItem;
                         break;
                     case "Menu":
-                        if (MenuContent != null) MenuContent.Visibility = Visibility.Visible;
+                        if (MainTabView != null) MainTabView.SelectedItem = MenuTabItem;
                         break;
                 }
             }

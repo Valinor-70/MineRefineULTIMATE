@@ -13,12 +13,13 @@ using Windows.UI;
 
 namespace MineRefine.Views
 {
-    public sealed class UltimateUpgradesDialog : ContentDialog
+    public sealed class UltimateUpgradesDialog : ContentDialog, IDisposable
     {
         private readonly Player _player;
         private readonly GameService _gameService; // Fixed: Changed from EnhancedGameService to GameService
         private StackPanel _upgradesPanel;
         private TextBlock _moneyTextBlock;
+        private bool _disposed = false;
 
         // Constants - Updated to current timestamp
         private const string CURRENT_DATETIME = "2025-06-06 21:39:17";
@@ -34,7 +35,41 @@ namespace MineRefine.Views
             PrimaryButtonText = "Close";
             DefaultButton = ContentDialogButton.Primary;
 
+            // Improved: Add proper event handling for cleanup
+            this.Closing += OnDialogClosing;
+
             SetupContent();
+        }
+
+        private void OnDialogClosing(ContentDialog sender, ContentDialogClosingEventArgs args)
+        {
+            // Cleanup resources when dialog is closing
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                try
+                {
+                    // Clear event handlers to prevent memory leaks
+                    this.Closing -= OnDialogClosing;
+                    
+                    // Clear references
+                    _upgradesPanel?.Children.Clear();
+                    _upgradesPanel = null;
+                    _moneyTextBlock = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"UltimateUpgradesDialog.Dispose error: {ex.Message}");
+                }
+                finally
+                {
+                    _disposed = true;
+                }
+            }
         }
 
         private void SetupContent()
