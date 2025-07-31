@@ -36,6 +36,7 @@ namespace MineRefine
         private readonly Random _random = new();
         private DispatcherTimer? _autoMiningTimer;
         private DispatcherTimer? _particleTimer;
+        private DispatcherTimer? _loadingTimer;
         private List<FrameworkElement> _particles = new();
 
         // Constants - Updated to current timestamp
@@ -70,6 +71,7 @@ namespace MineRefine
                 // Stop all timers
                 _particleTimer?.Stop();
                 _autoMiningTimer?.Stop();
+                _loadingTimer?.Stop();
                 
                 // Clear particle system
                 if (ParticleCanvas != null)
@@ -94,6 +96,54 @@ namespace MineRefine
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"MainWindow_Closed error: {ex.Message}");
+            }
+        }
+
+        // Improved: Add keyboard navigation support for better accessibility
+        private void KeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            try
+            {
+                args.Handled = true;
+                
+                switch (sender.Key)
+                {
+                    case Windows.System.VirtualKey.Number1:
+                        SwitchToTab("Mine");
+                        break;
+                    case Windows.System.VirtualKey.Number2:
+                        SwitchToTab("Locations");
+                        break;
+                    case Windows.System.VirtualKey.Number3:
+                        SwitchToTab("Skills");
+                        break;
+                    case Windows.System.VirtualKey.Number4:
+                        SwitchToTab("Achievements");
+                        break;
+                    case Windows.System.VirtualKey.Number5:
+                        SwitchToTab("Market");
+                        break;
+                    case Windows.System.VirtualKey.Number6:
+                        SwitchToTab("Menu");
+                        break;
+                    case Windows.System.VirtualKey.M when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
+                        MineButton_Click(MineButton, null);
+                        break;
+                    case Windows.System.VirtualKey.Space:
+                        MineButton_Click(MineButton, null);
+                        break;
+                    case Windows.System.VirtualKey.R when sender.Modifiers == Windows.System.VirtualKeyModifiers.Control:
+                        RestButton_Click(RestButton, null);
+                        break;
+                    default:
+                        args.Handled = false;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"KeyboardAccelerator_Invoked error: {ex.Message}");
+                args.Handled = false;
             }
         }
 
@@ -1535,6 +1585,8 @@ namespace MineRefine
             return null;
         }
 
+        private DispatcherTimer? _loadingTimer;
+
         private void ShowLoading(string message = "Loading...")
         {
             try
@@ -1542,6 +1594,18 @@ namespace MineRefine
                 if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Visible;
                 if (LoadingTitle != null) LoadingTitle.Text = "Processing...";
                 if (LoadingMessage != null) LoadingMessage.Text = message;
+
+                // Improved: Add timeout protection to prevent infinite loading
+                _loadingTimer?.Stop();
+                _loadingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) }; // 30 second timeout
+                _loadingTimer.Tick += (s, e) =>
+                {
+                    _loadingTimer.Stop();
+                    HideLoading();
+                    ShowNotification("⚠️ Operation Timeout", "The operation took too long and was cancelled.");
+                    System.Diagnostics.Debug.WriteLine("Loading timeout reached - hiding loading overlay");
+                };
+                _loadingTimer.Start();
             }
             catch (Exception ex)
             {
@@ -1553,6 +1617,10 @@ namespace MineRefine
         {
             try
             {
+                // Stop timeout timer
+                _loadingTimer?.Stop();
+                _loadingTimer = null;
+
                 if (LoadingOverlay != null) LoadingOverlay.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
@@ -1569,8 +1637,35 @@ namespace MineRefine
                 if (NotificationTitle != null) NotificationTitle.Text = title;
                 if (NotificationMessage != null) NotificationMessage.Text = message;
 
-                // Auto-hide after 6 seconds
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(6) };
+                // Improved: Visual feedback based on notification type
+                if (NotificationBorder != null)
+                {
+                    if (title.Contains("⚠️") || title.Contains("Error"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Red);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x4A, 0x1A, 0x1A));
+                    }
+                    else if (title.Contains("✅") || title.Contains("Success"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Green);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x1A, 0x4A, 0x1A));
+                    }
+                    else if (title.Contains("⚡") || title.Contains("Auto-Mining"))
+                    {
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Colors.Orange);
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x4A, 0x3A, 0x1A));
+                    }
+                    else
+                    {
+                        // Default styling
+                        NotificationBorder.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xD7, 0x00));
+                        NotificationBorder.Background = new SolidColorBrush(Color.FromArgb(0xDD, 0x2D, 0x2D, 0x30));
+                    }
+                }
+
+                // Auto-hide after 6 seconds (or longer for errors)
+                var hideDelay = title.Contains("⚠️") || title.Contains("Error") ? 10 : 6;
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(hideDelay) };
                 timer.Tick += (s, e) =>
                 {
                     timer.Stop();

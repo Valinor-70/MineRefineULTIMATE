@@ -12,7 +12,7 @@ using MineRefine.Services;
 
 namespace MineRefine.Views
 {
-    public sealed partial class UltimateMineralActionDialog : Window
+    public sealed partial class UltimateMineralActionDialog : Window, IDisposable
     {
         // Constants - Updated to current timestamp
         private const string CURRENT_DATETIME = "2025-06-07 09:50:08";
@@ -24,6 +24,7 @@ namespace MineRefine.Views
         private Player _currentPlayer;
         private List<Mineral> _availableMinerals = new(); // Fixed: Initialize to avoid CS8618
         private List<MarketData> _marketData = new(); // Fixed: Initialize to avoid CS8618
+        private bool _disposed = false;
 
         public UltimateMineralActionDialog(DataService dataService, Player player)
         {
@@ -38,8 +39,41 @@ namespace MineRefine.Views
             this.Title = "Ultimate Mineral Actions - Mine & Refine";
             SetWindowSize(1000, 750);
 
+            // Improved: Add proper cleanup event handler
+            this.Closed += OnWindowClosed;
+
             LoadMineralData();
             UpdateMarketDisplay();
+        }
+
+        private void OnWindowClosed(object sender, WindowEventArgs e)
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                try
+                {
+                    // Clear event handlers to prevent memory leaks
+                    this.Closed -= OnWindowClosed;
+                    
+                    // Clear collections and references
+                    _availableMinerals?.Clear();
+                    _marketData?.Clear();
+                    _currentPlayer = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"UltimateMineralActionDialog.Dispose error: {ex.Message}");
+                }
+                finally
+                {
+                    _disposed = true;
+                }
+            }
         }
 
         private void LoadMineralData()
