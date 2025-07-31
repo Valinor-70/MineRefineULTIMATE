@@ -436,40 +436,161 @@
                                  Style="{StaticResource UltimateTabViewItemStyle}"
                                  AutomationProperties.Name="Skill Development"
                                  AutomationProperties.HelpText="Manage skills and abilities (Ctrl+3)">
-                        <StackPanel x:Name="SkillsContent" Spacing="15">
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="15" HorizontalAlignment="Center">
-                                    <TextBlock Text="⚡ SKILL DEVELOPMENT" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="🚧 Skills system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Future features will include:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                        <TextBlock Text="• Interactive skill tree with specialization paths" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Mining efficiency and equipment bonuses" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Quantum mining unlocks and abilities" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Prestige system for advanced players" FontSize="12" Foreground="LightGray"/>
+                        <ScrollViewer x:Name="SkillsContent" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="15">
+                                <!-- Skills Header -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0" Spacing="8">
+                                            <TextBlock Text="⚡ SKILL DEVELOPMENT" FontSize="24" FontWeight="Bold" Foreground="#FFD700"/>
+                                            <TextBlock x:Name="SkillsStatsTextBlock" Text="Available Skill Points: 0 | Total Skills: 0/25" FontSize="14" Foreground="LightGray"/>
+                                            <TextBlock Text="Develop your mining expertise through specialized skill trees" FontSize="12" Foreground="White" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1" Spacing="8">
+                                            <Button x:Name="ResetSkillsButton" 
+                                                    Content="🔄 Reset Skills" 
+                                                    Background="#AA8B0000" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="12,6,12,6"
+                                                    Click="ResetSkillsButton_Click"/>
+                                            <Button x:Name="SkillsHelpButton" 
+                                                    Content="❓ Help" 
+                                                    Background="#AA4682B4" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="12,6,12,6"
+                                                    Click="SkillsHelpButton_Click"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Skill Categories -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="🎯 Skill Categories" FontSize="18" FontWeight="Bold" Foreground="#FFD700"/>
+                                        
+                                        <!-- Category Tabs -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Button x:Name="MiningSkillsCategoryButton" Content="⛏️ Mining" Tag="Mining" Click="SkillCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA228B22" MinWidth="100"/>
+                                            <Button x:Name="EquipmentSkillsCategoryButton" Content="⚒️ Equipment" Tag="Equipment" Click="SkillCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA800080" MinWidth="100"/>
+                                            <Button x:Name="ExplorationSkillsCategoryButton" Content="🗺️ Exploration" Tag="Exploration" Click="SkillCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA4169E1" MinWidth="100"/>
+                                            <Button x:Name="EconomicSkillsCategoryButton" Content="💰 Economic" Tag="Economic" Click="SkillCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AAB8860B" MinWidth="100"/>
+                                            <Button x:Name="QuantumSkillsCategoryButton" Content="🌌 Quantum" Tag="Quantum" Click="SkillCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA8A2BE2" MinWidth="100"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Skills Display Area -->
+                                        <ScrollViewer x:Name="SkillsScrollViewer" Height="400" VerticalScrollBarVisibility="Auto">
+                                            <Grid x:Name="SkillTreeGrid">
+                                                <!-- Skills will be dynamically populated here -->
+                                            </Grid>
+                                        </ScrollViewer>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
+                                </Border>
+
+                                <!-- Active Skills Summary -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="🎖️ Active Skill Bonuses" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                        <ScrollViewer x:Name="ActiveSkillsScrollViewer" Height="150" VerticalScrollBarVisibility="Auto">
+                                            <StackPanel x:Name="ActiveSkillsPanel" Spacing="5"/>
+                                        </ScrollViewer>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
                     </TabViewItem>
 
                     <!-- Achievements Tab -->
                     <TabViewItem x:Name="AchievementsTabItem" Header="🏆 ACHIEVEMENTS" Style="{StaticResource UltimateTabViewItemStyle}">
-                        <StackPanel x:Name="AchievementsContent" Spacing="15">
-                            <Border Style="{StaticResource CardStyle}">
-                                <StackPanel Spacing="15" HorizontalAlignment="Center">
-                                    <TextBlock Text="🏆 ACHIEVEMENTS" FontSize="24" FontWeight="Bold" Foreground="#FFD700" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="🚧 Achievement system coming in Phase 2!" FontSize="16" Foreground="Orange" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Planned achievement categories:" FontSize="14" Foreground="White" HorizontalAlignment="Center"/>
-                                    <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                        <TextBlock Text="• Mining milestones and discovery achievements" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Financial and progression goals" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Quantum realm exploration badges" FontSize="12" Foreground="LightGray"/>
-                                        <TextBlock Text="• Hidden achievements for dedicated miners" FontSize="12" Foreground="LightGray"/>
+                        <ScrollViewer x:Name="AchievementsContent" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="15">
+                                <!-- Achievements Header -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0" Spacing="8">
+                                            <TextBlock Text="🏆 ACHIEVEMENTS" FontSize="24" FontWeight="Bold" Foreground="#FFD700"/>
+                                            <TextBlock x:Name="AchievementsStatsTextBlock" Text="Progress: 0/30 (0%) | Points: 0" FontSize="14" Foreground="LightGray"/>
+                                            <TextBlock Text="Track your mining accomplishments and unlock special rewards" FontSize="12" Foreground="White" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1" Spacing="8">
+                                            <Button x:Name="ShowHiddenAchievementsButton" 
+                                                    Content="👁️ Hidden" 
+                                                    Background="#AA4B0082" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="12,6,12,6"
+                                                    Click="ShowHiddenAchievementsButton_Click"/>
+                                            <Button x:Name="AchievementsHelpButton" 
+                                                    Content="❓ Help" 
+                                                    Background="#AA4682B4" 
+                                                    Foreground="White" 
+                                                    CornerRadius="6" 
+                                                    Padding="12,6,12,6"
+                                                    Click="AchievementsHelpButton_Click"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Achievement Categories -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="📂 Achievement Categories" FontSize="18" FontWeight="Bold" Foreground="#FFD700"/>
+                                        
+                                        <!-- Category Filter -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Button x:Name="AllAchievementsCategoryButton" Content="📋 All" Tag="All" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA555555" MinWidth="80"/>
+                                            <Button x:Name="MiningAchievementsCategoryButton" Content="⛏️ Mining" Tag="Mining" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA228B22" MinWidth="80"/>
+                                            <Button x:Name="FinancialAchievementsCategoryButton" Content="💰 Financial" Tag="Financial" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AAB8860B" MinWidth="80"/>
+                                            <Button x:Name="DiscoveryAchievementsCategoryButton" Content="💎 Discovery" Tag="Discovery" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA4169E1" MinWidth="80"/>
+                                            <Button x:Name="ExplorationAchievementsCategoryButton" Content="🗺️ Exploration" Tag="Exploration" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA800080" MinWidth="80"/>
+                                            <Button x:Name="SkillsAchievementsCategoryButton" Content="📚 Skills" Tag="Skills" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA4682B4" MinWidth="80"/>
+                                            <Button x:Name="SpecialAchievementsCategoryButton" Content="⭐ Special" Tag="Special" Click="AchievementCategoryButton_Click" Style="{StaticResource ActionButtonStyle}" Background="#AA8A2BE2" MinWidth="80"/>
+                                        </StackPanel>
+                                        
+                                        <!-- Achievements Display -->
+                                        <ScrollViewer x:Name="AchievementsScrollViewer" Height="400" VerticalScrollBarVisibility="Auto">
+                                            <StackPanel x:Name="AchievementsPanel" Spacing="8"/>
+                                        </ScrollViewer>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
+                                </Border>
+
+                                <!-- Achievement Progress Summary -->
+                                <Border Style="{StaticResource CardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="📊 Progress Summary" FontSize="16" FontWeight="Bold" Foreground="#FFD700"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Spacing="8">
+                                                <TextBlock Text="Category Progress" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                <StackPanel x:Name="CategoryProgressPanel" Spacing="5"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Spacing="8">
+                                                <TextBlock Text="Recent Achievements" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                                <StackPanel x:Name="RecentAchievementsPanel" Spacing="5"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
                     </TabViewItem>
 
                     <!-- Market Tab -->

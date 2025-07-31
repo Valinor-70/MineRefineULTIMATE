@@ -23,6 +23,11 @@ namespace MineRefine
         private readonly GameService _gameService;
         private readonly MarketService _marketService;
         private readonly GameSettings _gameSettings;
+        
+        // Phase 2 Services
+        private readonly SkillsService _skillsService;
+        private readonly AchievementsService _achievementsService;
+        private readonly WeatherService _weatherService;
 
         // Game State
         private Player _currentPlayer;
@@ -37,7 +42,13 @@ namespace MineRefine
         private DispatcherTimer? _autoMiningTimer;
         private DispatcherTimer? _particleTimer;
         private DispatcherTimer? _loadingTimer;
+        private DispatcherTimer? _weatherTimer;
         private List<FrameworkElement> _particles = new();
+
+        // Phase 2 UI State
+        private string _currentSkillCategory = "Mining";
+        private string _currentAchievementCategory = "All";
+        private bool _showHiddenAchievements = false;
 
         // Constants - Updated to current timestamp
         private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
@@ -51,6 +62,15 @@ namespace MineRefine
             _dataService = new DataService();
             _gameService = new GameService();
             _marketService = new MarketService();
+            
+            // Initialize Phase 2 services
+            _skillsService = new SkillsService();
+            _achievementsService = new AchievementsService();
+            _weatherService = new WeatherService();
+            
+            // Hook up event handlers for Phase 2 features
+            _achievementsService.AchievementUnlocked += OnAchievementUnlocked;
+            _weatherService.WeatherChanged += OnWeatherChanged;
 
             this.Title = "Mine & Refine Ultimate Edition - Alpha v1.0.0";
 
@@ -72,6 +92,7 @@ namespace MineRefine
                 _particleTimer?.Stop();
                 _autoMiningTimer?.Stop();
                 _loadingTimer?.Stop();
+                _weatherTimer?.Stop();
                 
                 // Clear particle system
                 if (ParticleCanvas != null)
@@ -169,6 +190,10 @@ namespace MineRefine
                         UpdateLocationDescription();
                         InitializeGameLog();
                         InitializeParticleSystem();
+                        
+                        // Initialize Phase 2 systems
+                        InitializePhase2Systems();
+                        
                         ShowWelcomeTab();
                         HideLoading();
 
@@ -489,6 +514,25 @@ namespace MineRefine
                         _currentPlayer.MineralStats[result.Mineral.Id] = 0;
                     }
                     _currentPlayer.MineralStats[result.Mineral.Id]++;
+
+                    // Phase 2: Track achievements for successful mining
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_success", result);
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_completed", result);
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "money_earned", result);
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mineral_found", result.Mineral.Name);
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "location_mined", _currentLocation.Id);
+                    
+                    // Check for quantum materials
+                    if (IsQuantumMaterial(result.Mineral.Name))
+                    {
+                        _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "quantum_material_found", result.Mineral.Name);
+                    }
+                    
+                    // Check for high-risk mining achievement
+                    if (_currentRiskMultiplier >= 2.5)
+                    {
+                        _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_completed", _currentRiskMultiplier);
+                    }
                 }
                 else
                 {
@@ -500,6 +544,10 @@ namespace MineRefine
                     {
                         AddLogEntry(weatherImpact);
                     }
+
+                    // Phase 2: Track failure for consecutive success achievements
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_failure", result);
+                    _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "mining_completed", result);
                 }
 
                 UpdatePlayerDisplay();
@@ -1686,6 +1734,725 @@ namespace MineRefine
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"HideNotification error: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region Phase 2: Skills System
+
+        private void SkillCategoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string category)
+            {
+                _currentSkillCategory = category;
+                UpdateSkillCategoryButtons();
+                LoadSkillsForCategory(category);
+            }
+        }
+
+        private void UpdateSkillCategoryButtons()
+        {
+            // Update button styles to show active category
+            var buttons = new[] { MiningSkillsCategoryButton, EquipmentSkillsCategoryButton, ExplorationSkillsCategoryButton, EconomicSkillsCategoryButton, QuantumSkillsCategoryButton };
+            
+            foreach (var button in buttons)
+            {
+                if (button != null)
+                {
+                    if (button.Tag?.ToString() == _currentSkillCategory)
+                    {
+                        button.Opacity = 1.0;
+                        button.BorderThickness = new Thickness(3);
+                    }
+                    else
+                    {
+                        button.Opacity = 0.7;
+                        button.BorderThickness = new Thickness(2);
+                    }
+                }
+            }
+        }
+
+        private void LoadSkillsForCategory(string category)
+        {
+            try
+            {
+                if (SkillTreeGrid == null) return;
+
+                SkillTreeGrid.Children.Clear();
+                SkillTreeGrid.RowDefinitions.Clear();
+                SkillTreeGrid.ColumnDefinitions.Clear();
+
+                if (!Enum.TryParse<SkillCategory>(category, out var skillCategory)) return;
+
+                var skills = _skillsService.GetSkillsByCategory(skillCategory);
+                if (!skills.Any()) return;
+
+                // Create grid layout for skills
+                var rows = (int)Math.Ceiling(skills.Count / 3.0);
+                for (int i = 0; i < rows; i++)
+                {
+                    SkillTreeGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                }
+                for (int i = 0; i < 3; i++)
+                {
+                    SkillTreeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                }
+
+                // Add skills to grid
+                for (int i = 0; i < skills.Count; i++)
+                {
+                    var skill = skills[i];
+                    var skillCard = CreateSkillCard(skill);
+                    
+                    Grid.SetRow(skillCard, i / 3);
+                    Grid.SetColumn(skillCard, i % 3);
+                    SkillTreeGrid.Children.Add(skillCard);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadSkillsForCategory error: {ex.Message}");
+            }
+        }
+
+        private Border CreateSkillCard(Skill skill)
+        {
+            var isUnlocked = _skillsService.GetSkillLevel(_currentPlayer, skill.Id) > 0;
+            var canUnlock = _skillsService.CanUnlockSkill(_currentPlayer, skill.Id);
+            var canUpgrade = _skillsService.CanUpgradeSkill(_currentPlayer, skill.Id);
+            var currentLevel = _skillsService.GetSkillLevel(_currentPlayer, skill.Id);
+
+            var card = new Border
+            {
+                Style = this.Resources["CardStyle"] as Style,
+                Margin = new Thickness(5),
+                Background = new SolidColorBrush(isUnlocked ? Colors.DarkGreen : (canUnlock ? Colors.DarkOrange : Colors.DarkGray))
+            };
+
+            var stackPanel = new StackPanel { Spacing = 8 };
+
+            // Header
+            var headerPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            headerPanel.Children.Add(new TextBlock { Text = skill.Icon, FontSize = 20 });
+            headerPanel.Children.Add(new TextBlock { Text = skill.Name, FontSize = 14, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Colors.White) });
+            stackPanel.Children.Add(headerPanel);
+
+            // Level info
+            if (isUnlocked)
+            {
+                stackPanel.Children.Add(new TextBlock 
+                { 
+                    Text = $"Level {currentLevel}/{skill.MaxLevel}", 
+                    FontSize = 12, 
+                    Foreground = new SolidColorBrush(Colors.LightBlue) 
+                });
+            }
+
+            // Description
+            stackPanel.Children.Add(new TextBlock 
+            { 
+                Text = skill.Description, 
+                FontSize = 11, 
+                Foreground = new SolidColorBrush(Colors.LightGray), 
+                TextWrapping = TextWrapping.Wrap 
+            });
+
+            // Cost
+            if (!isUnlocked && canUnlock)
+            {
+                stackPanel.Children.Add(new TextBlock 
+                { 
+                    Text = $"Cost: {skill.SkillPointCost} SP", 
+                    FontSize = 11, 
+                    Foreground = new SolidColorBrush(Colors.Gold) 
+                });
+            }
+            else if (canUpgrade)
+            {
+                var upgradeCost = skill.SkillPointCost * (currentLevel + 1);
+                stackPanel.Children.Add(new TextBlock 
+                { 
+                    Text = $"Upgrade Cost: {upgradeCost} SP", 
+                    FontSize = 11, 
+                    Foreground = new SolidColorBrush(Colors.Gold) 
+                });
+            }
+
+            // Action button
+            if (canUnlock || canUpgrade)
+            {
+                var button = new Button
+                {
+                    Content = canUnlock ? "Unlock" : "Upgrade",
+                    Background = new SolidColorBrush(Colors.Green),
+                    Foreground = new SolidColorBrush(Colors.White),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    CornerRadius = new CornerRadius(4),
+                    Tag = skill.Id
+                };
+                button.Click += SkillActionButton_Click;
+                stackPanel.Children.Add(button);
+            }
+
+            card.Child = stackPanel;
+            return card;
+        }
+
+        private void SkillActionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string skillId)
+            {
+                var canUnlock = _skillsService.CanUnlockSkill(_currentPlayer, skillId);
+                var canUpgrade = _skillsService.CanUpgradeSkill(_currentPlayer, skillId);
+
+                if (canUnlock)
+                {
+                    if (_skillsService.UnlockSkill(_currentPlayer, skillId))
+                    {
+                        ShowNotification("Skill Unlocked!", $"You've unlocked a new skill!", NotificationType.Success);
+                        _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "skill_purchased", skillId);
+                        UpdateSkillsUI();
+                        UpdatePlayerUI();
+                    }
+                }
+                else if (canUpgrade)
+                {
+                    if (_skillsService.UpgradeSkill(_currentPlayer, skillId))
+                    {
+                        ShowNotification("Skill Upgraded!", $"Skill has been upgraded!", NotificationType.Success);
+                        _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "skill_upgraded", skillId);
+                        UpdateSkillsUI();
+                        UpdatePlayerUI();
+                    }
+                }
+            }
+        }
+
+        private void UpdateSkillsUI()
+        {
+            try
+            {
+                // Update skills stats
+                if (SkillsStatsTextBlock != null)
+                {
+                    var totalSkills = _skillsService.GetTotalSkillsUnlocked(_currentPlayer);
+                    SkillsStatsTextBlock.Text = $"Available Skill Points: {_currentPlayer.SkillPoints} | Total Skills: {totalSkills}/25";
+                }
+
+                // Update active skills panel
+                UpdateActiveSkillsPanel();
+
+                // Reload current category
+                LoadSkillsForCategory(_currentSkillCategory);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateSkillsUI error: {ex.Message}");
+            }
+        }
+
+        private void UpdateActiveSkillsPanel()
+        {
+            try
+            {
+                if (ActiveSkillsPanel == null) return;
+
+                ActiveSkillsPanel.Children.Clear();
+                var bonuses = _skillsService.GetAllSkillBonuses(_currentPlayer);
+
+                if (!bonuses.Any())
+                {
+                    ActiveSkillsPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = "No active skill bonuses", 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.Gray) 
+                    });
+                    return;
+                }
+
+                foreach (var bonus in bonuses)
+                {
+                    var bonusPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+                    bonusPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = FormatBonusName(bonus.Key), 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.White) 
+                    });
+                    bonusPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = $"+{bonus.Value:P0}", 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.LightGreen) 
+                    });
+                    ActiveSkillsPanel.Children.Add(bonusPanel);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateActiveSkillsPanel error: {ex.Message}");
+            }
+        }
+
+        private string FormatBonusName(string bonusKey)
+        {
+            return bonusKey switch
+            {
+                "mining_efficiency" => "⛏️ Mining Efficiency",
+                "max_stamina" => "💪 Max Stamina",
+                "critical_chance" => "💥 Critical Chance",
+                "rare_mineral_chance" => "💎 Rare Find Rate",
+                "safety_bonus" => "🛡️ Safety Bonus",
+                "equipment_bonus" => "⚒️ Equipment Bonus",
+                "stamina_efficiency" => "⚡ Stamina Efficiency",
+                "weather_resistance" => "🌤️ Weather Resistance",
+                "quantum_discovery" => "🌌 Quantum Discovery",
+                _ => bonusKey.Replace("_", " ")
+            };
+        }
+
+        private void ResetSkillsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // For now, just show a message - could implement skill reset functionality
+            ShowNotification("Reset Skills", "Skill reset functionality coming soon!", NotificationType.Info);
+        }
+
+        private void SkillsHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowNotification("Skills Help", "Skills improve your mining efficiency and unlock new abilities. Earn skill points by leveling up!", NotificationType.Info);
+        }
+
+        #endregion
+
+        #region Phase 2: Achievements System
+
+        private void AchievementCategoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string category)
+            {
+                _currentAchievementCategory = category;
+                UpdateAchievementCategoryButtons();
+                LoadAchievementsForCategory(category);
+            }
+        }
+
+        private void UpdateAchievementCategoryButtons()
+        {
+            var buttons = new[] { AllAchievementsCategoryButton, MiningAchievementsCategoryButton, FinancialAchievementsCategoryButton, 
+                                 DiscoveryAchievementsCategoryButton, ExplorationAchievementsCategoryButton, SkillsAchievementsCategoryButton, 
+                                 SpecialAchievementsCategoryButton };
+            
+            foreach (var button in buttons)
+            {
+                if (button != null)
+                {
+                    if (button.Tag?.ToString() == _currentAchievementCategory)
+                    {
+                        button.Opacity = 1.0;
+                        button.BorderThickness = new Thickness(3);
+                    }
+                    else
+                    {
+                        button.Opacity = 0.7;
+                        button.BorderThickness = new Thickness(2);
+                    }
+                }
+            }
+        }
+
+        private void LoadAchievementsForCategory(string category)
+        {
+            try
+            {
+                if (AchievementsPanel == null) return;
+
+                AchievementsPanel.Children.Clear();
+
+                var achievements = category == "All" 
+                    ? _achievementsService.GetAllAchievements().Where(a => !a.IsHidden || _showHiddenAchievements).ToList()
+                    : _achievementsService.GetAchievementsByCategory(category);
+
+                if (!achievements.Any())
+                {
+                    AchievementsPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = "No achievements in this category", 
+                        FontSize = 14, 
+                        Foreground = new SolidColorBrush(Colors.Gray),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+                    return;
+                }
+
+                foreach (var achievement in achievements.OrderByDescending(a => a.IsCompleted).ThenBy(a => a.Name))
+                {
+                    var achievementCard = CreateAchievementCard(achievement);
+                    AchievementsPanel.Children.Add(achievementCard);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadAchievementsForCategory error: {ex.Message}");
+            }
+        }
+
+        private Border CreateAchievementCard(Achievement achievement)
+        {
+            var card = new Border
+            {
+                Style = this.Resources["CardStyle"] as Style,
+                Margin = new Thickness(5),
+                Background = new SolidColorBrush(achievement.IsCompleted ? Colors.DarkGreen : Colors.DarkSlateGray)
+            };
+
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            // Icon
+            var iconPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            iconPanel.Children.Add(new TextBlock { Text = achievement.Icon, FontSize = 24 });
+            if (achievement.IsCompleted)
+            {
+                iconPanel.Children.Add(new TextBlock { Text = "✅", FontSize = 16 });
+            }
+            Grid.SetColumn(iconPanel, 0);
+
+            // Content
+            var contentPanel = new StackPanel { Spacing = 5, Margin = new Thickness(15, 0, 15, 0) };
+            
+            var titlePanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+            titlePanel.Children.Add(new TextBlock 
+            { 
+                Text = achievement.Name, 
+                FontSize = 14, 
+                FontWeight = FontWeights.Bold, 
+                Foreground = new SolidColorBrush(achievement.IsCompleted ? Colors.Gold : Colors.White) 
+            });
+            
+            if (achievement.IsHidden && !achievement.IsCompleted)
+            {
+                titlePanel.Children.Add(new TextBlock { Text = "🔒", FontSize = 12 });
+            }
+            
+            contentPanel.Children.Add(titlePanel);
+            
+            contentPanel.Children.Add(new TextBlock 
+            { 
+                Text = achievement.Description, 
+                FontSize = 12, 
+                Foreground = new SolidColorBrush(Colors.LightGray),
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            // Progress
+            if (!achievement.IsCompleted && achievement.RequiredValue > 0)
+            {
+                var progressText = $"Progress: {achievement.CurrentProgress}/{achievement.RequiredValue}";
+                contentPanel.Children.Add(new TextBlock 
+                { 
+                    Text = progressText, 
+                    FontSize = 11, 
+                    Foreground = new SolidColorBrush(Colors.LightBlue) 
+                });
+
+                var progressBar = new ProgressBar
+                {
+                    Minimum = 0,
+                    Maximum = achievement.RequiredValue,
+                    Value = achievement.CurrentProgress,
+                    Height = 6,
+                    Foreground = new SolidColorBrush(Colors.Gold)
+                };
+                contentPanel.Children.Add(progressBar);
+            }
+
+            Grid.SetColumn(contentPanel, 1);
+
+            // Points
+            var pointsPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            pointsPanel.Children.Add(new TextBlock 
+            { 
+                Text = $"{achievement.PointValue}", 
+                FontSize = 16, 
+                FontWeight = FontWeights.Bold, 
+                Foreground = new SolidColorBrush(Colors.Gold),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+            pointsPanel.Children.Add(new TextBlock 
+            { 
+                Text = "pts", 
+                FontSize = 10, 
+                Foreground = new SolidColorBrush(Colors.Gray),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+            Grid.SetColumn(pointsPanel, 2);
+
+            grid.Children.Add(iconPanel);
+            grid.Children.Add(contentPanel);
+            grid.Children.Add(pointsPanel);
+
+            card.Child = grid;
+            return card;
+        }
+
+        private void UpdateAchievementsUI()
+        {
+            try
+            {
+                // Update achievements stats
+                if (AchievementsStatsTextBlock != null)
+                {
+                    var completed = _achievementsService.GetCompletedAchievements().Count;
+                    var total = _achievementsService.GetAllAchievements().Count(a => !a.IsHidden);
+                    var percentage = total > 0 ? (double)completed / total * 100 : 0;
+                    var points = _achievementsService.GetTotalAchievementPoints();
+                    AchievementsStatsTextBlock.Text = $"Progress: {completed}/{total} ({percentage:F0}%) | Points: {points}";
+                }
+
+                // Update category progress
+                UpdateCategoryProgressPanel();
+
+                // Update recent achievements
+                UpdateRecentAchievementsPanel();
+
+                // Reload current category
+                LoadAchievementsForCategory(_currentAchievementCategory);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateAchievementsUI error: {ex.Message}");
+            }
+        }
+
+        private void UpdateCategoryProgressPanel()
+        {
+            try
+            {
+                if (CategoryProgressPanel == null) return;
+
+                CategoryProgressPanel.Children.Clear();
+                var categoryProgress = _achievementsService.GetCategoryProgress();
+
+                foreach (var category in categoryProgress)
+                {
+                    var categoryPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+                    categoryPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = category.Key, 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.White),
+                        Width = 80
+                    });
+                    categoryPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = $"{category.Value}%", 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.LightGreen) 
+                    });
+                    CategoryProgressPanel.Children.Add(categoryPanel);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateCategoryProgressPanel error: {ex.Message}");
+            }
+        }
+
+        private void UpdateRecentAchievementsPanel()
+        {
+            try
+            {
+                if (RecentAchievementsPanel == null) return;
+
+                RecentAchievementsPanel.Children.Clear();
+                var recentAchievements = _achievementsService.GetCompletedAchievements()
+                    .OrderByDescending(a => a.CompletedDate)
+                    .Take(5);
+
+                if (!recentAchievements.Any())
+                {
+                    RecentAchievementsPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = "No achievements yet", 
+                        FontSize = 12, 
+                        Foreground = new SolidColorBrush(Colors.Gray) 
+                    });
+                    return;
+                }
+
+                foreach (var achievement in recentAchievements)
+                {
+                    var achievementPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+                    achievementPanel.Children.Add(new TextBlock { Text = achievement.Icon, FontSize = 14 });
+                    achievementPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = achievement.Name, 
+                        FontSize = 11, 
+                        Foreground = new SolidColorBrush(Colors.White) 
+                    });
+                    RecentAchievementsPanel.Children.Add(achievementPanel);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateRecentAchievementsPanel error: {ex.Message}");
+            }
+        }
+
+        private void ShowHiddenAchievementsButton_Click(object sender, RoutedEventArgs e)
+        {
+            _showHiddenAchievements = !_showHiddenAchievements;
+            if (ShowHiddenAchievementsButton != null)
+            {
+                ShowHiddenAchievementsButton.Content = _showHiddenAchievements ? "👁️ Visible" : "👁️ Hidden";
+            }
+            LoadAchievementsForCategory(_currentAchievementCategory);
+        }
+
+        private void AchievementsHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowNotification("Achievements Help", "Complete achievements to earn points and unlock rewards. Some achievements are hidden until discovered!", NotificationType.Info);
+        }
+
+        private void OnAchievementUnlocked(object sender, Achievement achievement)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ShowNotification("🏆 Achievement Unlocked!", $"{achievement.Name}: {achievement.Description}", NotificationType.Achievement);
+                UpdateAchievementsUI();
+            });
+        }
+
+        #endregion
+
+        #region Phase 2: Weather System
+
+        private void InitializeWeatherSystem()
+        {
+            try
+            {
+                _weatherService.InitializeWeatherForPlayer(_currentPlayer);
+                
+                // Start weather update timer
+                _weatherTimer = new DispatcherTimer();
+                _weatherTimer.Interval = TimeSpan.FromMinutes(1); // Check weather every minute
+                _weatherTimer.Tick += WeatherTimer_Tick;
+                _weatherTimer.Start();
+
+                UpdateWeatherDisplay();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"InitializeWeatherSystem error: {ex.Message}");
+            }
+        }
+
+        private void WeatherTimer_Tick(object sender, object e)
+        {
+            _weatherService.UpdateWeather();
+            UpdateWeatherDisplay();
+        }
+
+        private void UpdateWeatherDisplay()
+        {
+            try
+            {
+                if (WeatherTextBlock != null)
+                {
+                    var weather = _weatherService.GetCurrentWeather();
+                    var effect = _weatherService.GetCurrentWeatherEffect();
+                    WeatherTextBlock.Text = $"{effect.Icon} {effect.Name}";
+                    
+                    // Update tooltip with detailed weather info
+                    ToolTipService.SetToolTip(WeatherTextBlock, 
+                        $"{effect.Description}\n{_weatherService.GetWeatherImpactDescription()}\n{_weatherService.GetWeatherForecast()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"UpdateWeatherDisplay error: {ex.Message}");
+            }
+        }
+
+        private void OnWeatherChanged(object sender, WeatherCondition newWeather)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                var effect = _weatherService.GetCurrentWeatherEffect();
+                ShowNotification("🌤️ Weather Changed", $"Weather is now {effect.Name}: {effect.Description}", NotificationType.Info);
+                UpdateWeatherDisplay();
+                
+                // Track weather encounter for achievements
+                _achievementsService.CheckAndUpdateAchievements(_currentPlayer, "weather_survived", newWeather);
+            });
+        }
+
+        #endregion
+
+        #region Phase 2: Enhanced Mining with Skills and Weather
+
+        private bool IsQuantumMaterial(string mineralName)
+        {
+            var quantumMinerals = new[] { "Void Crystal", "Temporal Gem", "Antimatter Fragment", "Reality Shard", "Quantum Dust", "Dimensional Ore" };
+            return quantumMinerals.Contains(mineralName);
+        }
+
+        private void ApplyPhase2Bonuses(ref double efficiency, ref double safety, ref double staminaCost, ref double quantumBonus, ref double rareBonus)
+        {
+            try
+            {
+                // Apply skill bonuses
+                _skillsService.ApplySkillBonusesToMining(_currentPlayer, ref efficiency, ref safety, ref staminaCost);
+                
+                // Apply weather effects
+                _weatherService.ApplyWeatherEffects(ref efficiency, ref safety, ref staminaCost, ref quantumBonus, ref rareBonus);
+                
+                // Apply skill bonuses to weather resistance
+                var weatherPenalty = 1.0 - safety;
+                _skillsService.ApplySkillBonusesToWeather(_currentPlayer, ref weatherPenalty);
+                safety = 1.0 - weatherPenalty;
+                
+                // Apply quantum bonuses from skills
+                quantumBonus += _skillsService.GetQuantumBonus(_currentPlayer);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ApplyPhase2Bonuses error: {ex.Message}");
+            }
+        }
+
+        private void InitializePhase2Systems()
+        {
+            try
+            {
+                // Initialize skills for player
+                _skillsService.InitializePlayerSkills(_currentPlayer);
+                
+                // Initialize achievements for player
+                _achievementsService.InitializePlayerAchievements(_currentPlayer);
+                
+                // Initialize weather system
+                InitializeWeatherSystem();
+                
+                // Update UI
+                UpdateSkillsUI();
+                UpdateAchievementsUI();
+                
+                // Set default categories
+                UpdateSkillCategoryButtons();
+                LoadSkillsForCategory(_currentSkillCategory);
+                
+                UpdateAchievementCategoryButtons();
+                LoadAchievementsForCategory(_currentAchievementCategory);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"InitializePhase2Systems error: {ex.Message}");
             }
         }
 
