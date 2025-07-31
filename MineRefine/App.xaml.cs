@@ -10,7 +10,7 @@ namespace MineRefine
         private Window? m_window;
 
         // Constants - Updated to current timestamp
-        private const string CURRENT_DATETIME = "2025-06-07 08:34:00";
+        private const string CURRENT_DATETIME = "2025-07-31 13:29:22";
 
         public App()
         {

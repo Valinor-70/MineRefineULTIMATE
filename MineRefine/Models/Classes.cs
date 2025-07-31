@@ -230,7 +230,7 @@ namespace MineRefine.Models
         {
             if (!HasVisitedLocation(locationId))
             {
-                LocationFirstVisit[locationId] = DateTime.Parse("2025-06-07 09:20:35");
+                LocationFirstVisit[locationId] = DateTime.Parse("2025-07-31 13:29:22");
             }
         }
 
@@ -305,7 +305,7 @@ namespace MineRefine.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string PlayerId { get; set; } = "Valinor-70";
         public string LocationId { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime StartTime { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public DateTime EndTime { get; set; }
         public TimeSpan Duration { get; set; }
         public double RiskMultiplier { get; set; } = 1.0;
@@ -374,7 +374,7 @@ namespace MineRefine.Models
         public string Message { get; set; } = string.Empty;
         public int ExperienceGained { get; set; }
         public string? BonusDiscovery { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime Timestamp { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public Dictionary<string, object> AdditionalData { get; set; } = new();
         public WeatherCondition WeatherAtTime { get; set; } = WeatherCondition.Clear;
 
@@ -418,13 +418,13 @@ namespace MineRefine.Models
         public bool IsLegendary { get; set; } = false;
         public Dictionary<string, double> ProcessingRequirements { get; set; } = new();
         public List<string> SpecialProperties { get; set; } = new();
-        public DateTime DiscoveredDate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime DiscoveredDate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public string DiscoveredBy { get; set; } = "Valinor-70";
 
         // Market Properties
         public double CurrentMarketMultiplier { get; set; } = 1.0;
         public string MarketTrend { get; set; } = "Stable";
-        public DateTime LastPriceUpdate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastPriceUpdate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public List<double> PriceHistory { get; set; } = new();
         public double DailyVolume { get; set; } = 0.0;
         public double SupplyLevel { get; set; } = 100.0;
@@ -518,7 +518,7 @@ namespace MineRefine.Models
                 PriceHistory.RemoveAt(0);
             }
 
-            LastPriceUpdate = DateTime.Parse("2025-06-07 09:20:35");
+            LastPriceUpdate = DateTime.Parse("2025-07-31 13:29:22");
 
             MarketTrend = changePercent switch
             {
@@ -566,7 +566,7 @@ namespace MineRefine.Models
         public Dictionary<string, string> EnvironmentalConditions { get; set; } = new();
         public List<string> RequiredEquipment { get; set; } = new();
         public double SuccessRateModifier { get; set; } = 1.0;
-        public DateTime LastVisited { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastVisited { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public int TimesVisited { get; set; } = 0;
         public WeatherCondition CurrentWeather { get; set; } = WeatherCondition.Clear;
         public Dictionary<string, int> MineralDiscoveryCount { get; set; } = new();
@@ -619,7 +619,7 @@ namespace MineRefine.Models
         public void Visit()
         {
             TimesVisited++;
-            LastVisited = DateTime.Parse("2025-06-07 09:20:35");
+            LastVisited = DateTime.Parse("2025-07-31 13:29:22");
         }
 
         public double GetMineralBonus(string mineralId)
@@ -672,7 +672,7 @@ namespace MineRefine.Models
         public List<string> SpecialAbilities { get; set; } = new();
 
         // Enhanced Properties
-        public DateTime AcquiredDate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime AcquiredDate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public int TimesUsed { get; set; } = 0;
         public List<string> RequiredSkills { get; set; } = new();
         public Dictionary<string, string> UpgradeTree { get; set; } = new();
@@ -683,7 +683,7 @@ namespace MineRefine.Models
         public int WearRate { get; set; } = 1;
         public Dictionary<string, double> EnvironmentalResistance { get; set; } = new();
         public List<string> CompatibleLocations { get; set; } = new();
-        public DateTime LastMaintenance { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastMaintenance { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public double MaintenanceCostMultiplier { get; set; } = 1.0;
         public string Condition { get; set; } = "Excellent";
 
@@ -717,7 +717,7 @@ namespace MineRefine.Models
         {
             var repairAmount = amount > 0 ? amount : MaxDurability - Durability;
             Durability = Math.Min(MaxDurability, Durability + repairAmount);
-            LastMaintenance = DateTime.Parse("2025-06-07 09:20:35");
+            LastMaintenance = DateTime.Parse("2025-07-31 13:29:22");
 
             UpdateCondition();
         }
@@ -772,7 +772,7 @@ namespace MineRefine.Models
         public bool RequiresMaintenance()
         {
             return Durability < MaxDurability * 0.5 ||
-                   DateTime.Parse("2025-06-07 09:20:35").Subtract(LastMaintenance).TotalDays > 7;
+                   DateTime.Parse("2025-07-31 13:29:22").Subtract(LastMaintenance).TotalDays > 7;
         }
 
         public string GetRarityColor()
@@ -844,7 +844,7 @@ namespace MineRefine.Models
         public void Complete()
         {
             IsCompleted = true;
-            CompletedDate = DateTime.Parse("2025-06-07 09:20:35");
+            CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
             CompletedBy = "Valinor-70";
             ProgressPercentage = 100.0;
         }
@@ -883,7 +883,7 @@ namespace MineRefine.Models
         public double PriceChange { get; set; } = 0.0;
         public string Trend { get; set; } = "Stable";
         public double Volume { get; set; } = 0.0;
-        public DateTime LastUpdate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastUpdate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public List<double> PriceHistory { get; set; } = new();
         public double Volatility { get; set; } = 0.1;
 
@@ -897,7 +897,7 @@ namespace MineRefine.Models
         // Additional Properties
         public double PriceMultiplier { get; set; } = 1.0;
         public string TrendIcon { get; set; } = "📈";
-        public DateTime LastUpdated { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastUpdated { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public string MarketSentiment { get; set; } = "Neutral";
 
         public void UpdatePrice(double changePercent)
@@ -913,7 +913,7 @@ namespace MineRefine.Models
                 PriceHistory.RemoveAt(0);
             }
 
-            LastUpdate = DateTime.Parse("2025-06-07 09:20:35");
+            LastUpdate = DateTime.Parse("2025-07-31 13:29:22");
             LastUpdated = LastUpdate;
 
             Trend = changePercent switch
@@ -965,7 +965,7 @@ namespace MineRefine.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime StartTime { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public DateTime EndTime { get; set; }
         public List<string> AffectedMinerals { get; set; } = new();
         public Dictionary<string, double> PriceMultipliers { get; set; } = new();
@@ -975,7 +975,7 @@ namespace MineRefine.Models
 
         public bool IsCurrentlyActive()
         {
-            var now = DateTime.Parse("2025-06-07 09:20:35");
+            var now = DateTime.Parse("2025-07-31 13:29:22");
             return IsActive && now >= StartTime && now <= EndTime;
         }
 
@@ -996,7 +996,7 @@ namespace MineRefine.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime StartTime { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public DateTime EndTime { get; set; }
         public TimeSpan Duration { get; set; } = TimeSpan.FromHours(24);
         public string EventType { get; set; } = "Market";
@@ -1020,19 +1020,19 @@ namespace MineRefine.Models
 
         // Additional Properties
         public string Icon { get; set; } = "📈";
-        public DateTime StartDate { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime StartDate { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public int DurationDays { get; set; } = 1;
         public Dictionary<string, double> MineralEffects { get; set; } = new();
 
         public bool IsCurrentlyActive()
         {
-            var now = DateTime.Parse("2025-06-07 09:20:35");
+            var now = DateTime.Parse("2025-07-31 13:29:22");
             return IsActive && now >= StartTime && now <= EndTime;
         }
 
         public void StartEvent()
         {
-            StartTime = DateTime.Parse("2025-06-07 09:20:35");
+            StartTime = DateTime.Parse("2025-07-31 13:29:22");
             StartDate = StartTime;
             EndTime = StartTime.Add(Duration);
             IsActive = true;
@@ -1040,7 +1040,7 @@ namespace MineRefine.Models
 
         public void EndEvent()
         {
-            EndTime = DateTime.Parse("2025-06-07 09:20:35");
+            EndTime = DateTime.Parse("2025-07-31 13:29:22");
             IsActive = false;
         }
 
@@ -1062,7 +1062,7 @@ namespace MineRefine.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; } = DateTime.Parse("2025-06-07 09:27:03");
+        public DateTime StartTime { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public DateTime EndTime { get; set; }
         public TimeSpan Duration { get; set; } = TimeSpan.FromDays(7);
         public string EventType { get; set; } = "Special";
@@ -1101,7 +1101,7 @@ namespace MineRefine.Models
         // Constructor to properly initialize fields - FIXED
         public SpecialEvent()
         {
-            var currentTime = DateTime.Parse("2025-06-07 09:27:03");
+            var currentTime = DateTime.Parse("2025-07-31 13:29:22");
             StartDate = currentTime;
             EndDate = currentTime.AddDays(7);
             Type = Models.EventType.Special; // Fixed: Use proper enum reference
@@ -1109,13 +1109,13 @@ namespace MineRefine.Models
 
         public bool IsCurrentlyActive()
         {
-            var now = DateTime.Parse("2025-06-07 09:27:03");
+            var now = DateTime.Parse("2025-07-31 13:29:22");
             return IsActive && now >= StartTime && now <= EndTime && !IsCompleted;
         }
 
         public void StartEvent()
         {
-            StartTime = DateTime.Parse("2025-06-07 09:27:03");
+            StartTime = DateTime.Parse("2025-07-31 13:29:22");
             StartDate = StartTime;
             EndTime = StartTime.Add(Duration);
             EndDate = EndTime;
@@ -1126,7 +1126,7 @@ namespace MineRefine.Models
         public void CompleteEvent(string completedBy)
         {
             IsCompleted = true;
-            CompletedDate = DateTime.Parse("2025-06-07 09:27:03");
+            CompletedDate = DateTime.Parse("2025-07-31 13:29:22");
             CompletedBy = completedBy;
             IsActive = false;
         }
@@ -1190,7 +1190,7 @@ namespace MineRefine.Models
     {
         // Application Settings
         public string CurrentUser { get; set; } = "Valinor-70";
-        public DateTime LastUpdated { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime LastUpdated { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public string Version { get; set; } = "1.0.0-alpha";
         public string Theme { get; set; } = "Dark";
 
@@ -1243,7 +1243,7 @@ namespace MineRefine.Models
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string PlayerId { get; set; } = "Valinor-70";
-        public DateTime StartTime { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime StartTime { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public DateTime? EndTime { get; set; }
         public TimeSpan Duration { get; set; }
         public string Version { get; set; } = "1.0.0-alpha";
@@ -1264,7 +1264,7 @@ namespace MineRefine.Models
 
         public void EndSession()
         {
-            EndTime = DateTime.Parse("2025-06-07 09:20:35");
+            EndTime = DateTime.Parse("2025-07-31 13:29:22");
             Duration = EndTime.Value - StartTime;
         }
 
@@ -1301,7 +1301,7 @@ namespace MineRefine.Models
         public string Title { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public NotificationType Type { get; set; } = NotificationType.Info;
-        public DateTime Timestamp { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime Timestamp { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public bool IsRead { get; set; } = false;
         public string Icon { get; set; } = "ℹ️";
         public Dictionary<string, object> Data { get; set; } = new();
@@ -1341,7 +1341,7 @@ namespace MineRefine.Models
     public class SaveDataV1
     {
         public string Version { get; set; } = "1.0.0";
-        public DateTime SavedAt { get; set; } = DateTime.Parse("2025-06-07 09:20:35");
+        public DateTime SavedAt { get; set; } = DateTime.Parse("2025-07-31 13:29:22");
         public string SavedBy { get; set; } = "Valinor-70";
         public List<Player> Players { get; set; } = new();
         public GameSettings Settings { get; set; } = new();
@@ -1362,7 +1362,7 @@ namespace MineRefine.Models
 
         public void UpdateSaveInfo()
         {
-            SavedAt = DateTime.Parse("2025-06-07 09:20:35");
+            SavedAt = DateTime.Parse("2025-07-31 13:29:22");
             SavedBy = "Valinor-70";
         }
 
@@ -1489,7 +1489,7 @@ namespace MineRefine.Models
 
         public static string GetTimeSince(DateTime dateTime)
         {
-            var now = DateTime.Parse("2025-06-07 09:20:35");
+            var now = DateTime.Parse("2025-07-31 13:29:22");
             var diff = now - dateTime;
 
             return diff.TotalDays switch
